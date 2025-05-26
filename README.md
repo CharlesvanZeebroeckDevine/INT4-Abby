@@ -6,8 +6,7 @@ IMPORTANT STUFF... (update)
 - Charles van Zeebroeck (Teamleader), Plant, Coordinator.
 - Mohamed Jilali (Team Member), Investigator, 
 - Staf Parent (Team Member), Team worker, Finisher
-- Mauro Vangheluwe (Team Member)
-
+- Mauro Vangheluwe (Team Member) Plant, Implementer
 
 ## Agreements:
 - Follow deadlines
