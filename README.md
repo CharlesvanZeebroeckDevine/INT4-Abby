@@ -7,7 +7,7 @@ ROLES TO SPLIT: Plant, Evaluator, Specialist, Shaper, Implementer, Finisher, Coo
 - Charles van Zeebroeck (Teamleader)
 - Mohamed Jilali (Team Member)
 - Staf Parent (Team Member)
-- Mauro Vangheluwe (Team Member)
+- Mauro Vangheluwe (Team Member) Plant, Implementer
 
 
 ## Agreements:
