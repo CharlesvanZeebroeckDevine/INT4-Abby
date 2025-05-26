@@ -3,12 +3,10 @@
 IMPORTANT STUFF... (update)
 
 ## Team members and roles:
-ROLES TO SPLIT: Plant, Evaluator, Specialist, Shaper, Implementer, Finisher, Coordinator, team worker, investigator
-- Charles van Zeebroeck (Teamleader)
-- Mohamed Jilali (Team Member)
-- Staf Parent (Team Member)
+- Charles van Zeebroeck (Teamleader), Plant, Coordinator.
+- Mohamed Jilali (Team Member), Investigator, 
+- Staf Parent (Team Member), Team worker, Finisher
 - Mauro Vangheluwe (Team Member) Plant, Implementer
-
 
 ## Agreements:
 - Follow deadlines
