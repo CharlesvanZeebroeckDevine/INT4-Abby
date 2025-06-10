@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
-import { Layout } from "../components/ui/layout"
+import { Layout } from "../components/layout"
 import { Modal } from "../components/ui/modal"
 import "./page.css"
 

@@ -51,7 +51,9 @@ export function Layout({
             disabled={isSubmitting}
             aria-label="Go to previous step"
           >
-            <img src="/arrow.png" alt="Previous" className="abby-arrow-icon" />
+            <svg width="17" height="14" viewBox="0 0 17 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 5.02508L9.78745 0V4.55695L3.3116 6.60502L17 5.02508V9.07001L3.3116 7.44619L9.78745 9.50157V14L0 9.07001L0 5.02508Z" fill="black" />
+            </svg>
             <span>Previous</span>
           </button>
         )}
