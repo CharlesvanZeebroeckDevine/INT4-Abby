@@ -14,6 +14,7 @@ export const createProfile = async (profileData) => {
         id: profileData.id, // Use the provided ID (generated in form-context)
         creator_name: profileData.creatorName,
         full_name: profileData.fullName,
+        email: profileData.email,
         description: profileData.aboutYou,
         avatar_url: profileData.avatarUrl,
         avatar_color: profileData.avatarColor,
@@ -141,6 +142,7 @@ export async function saveSubmission(submissionData) {
       id: profileId,
       creatorName: submissionData.creator_name,
       fullName: submissionData.contact_name,
+      email: submissionData.contact_email,
       aboutYou: submissionData.about_you,
       avatarUrl: avatarUrl, // Use the uploaded avatar URL
       avatarColor: submissionData.avatar_color,

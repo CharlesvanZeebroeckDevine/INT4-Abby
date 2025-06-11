@@ -115,21 +115,12 @@ export default function ArtworkPage() {
     if (!validateArtworkForm()) return
 
     setIsSubmitting(true)
-
     try {
-      console.log("Attempting to submit form...")
-      const { success, error } = await submitForm()
-
-      if (success) {
-        console.log("Form submitted successfully!")
-        router.push("/success")
-      } else {
-        console.error("Submission error:", error)
-        setErrors({ submit: error.message || "Failed to submit. Please try again." })
-      }
+      dispatch({ type: "SET_STEP", payload: 3 })
+      router.push("/contact")
     } catch (error) {
-      console.error("Submission error:", error)
-      setErrors({ submit: error.message || "Failed to submit. Please try again." })
+      console.error("Navigation error:", error)
+      setErrors({ submit: "Failed to proceed. Please try again." })
     } finally {
       setIsSubmitting(false)
     }
