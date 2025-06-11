@@ -30,7 +30,7 @@ html,
 body {
   font-family: GT Walsheim;
   height: 100%;
-  font-style:normal;
+  font-style: normal;
   line-height: 1.6;
   border-radius: 0;
 }
@@ -106,9 +106,9 @@ body {
 }
 
 .abby-header div {
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
 }
 
 .abby-header-landing {
@@ -304,8 +304,14 @@ body {
 
 .abby-field-label {
   font-size: var(--font-size-lg);
-  font-weight: 500;
+  line-height: 1;
+  font-weight: 400;
 }
+
+.process-label {
+  font-size: var(--font-size-base);
+}
+
 
 .abby-field-footer {
   display: flex;
@@ -1128,8 +1134,6 @@ body {
 }
 
 .abby-process-section {
-  padding-left: var(--spacing-xl);
-  border-left: 2px solid rgba(1, 165, 105, 0.2);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
@@ -1413,4 +1417,3 @@ body {
   opacity: 0;
   cursor: pointer;
 }
-

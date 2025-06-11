@@ -1,123 +1,22 @@
 import { createClient } from "@supabase/supabase-js"
-import { saveUserSession } from "./user-session"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Admin client with service role key for bypassing RLS
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey, {
-  auth: {
-    persistSession: false,
-  },
-})
-
-// Client-side Supabase client (singleton pattern)
-let supabaseClient = null
-
-export const getSupabaseClient = () => {
-  if (!supabaseClient) {
-    supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
-  }
-  return supabaseClient
-}
-
-// Auth helpers
-export const signUp = async (email, password, userData) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: userData,
-    },
-  })
-  return { data, error }
-}
-
-export const signIn = async (email, password) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-  return { data, error }
-}
-
-export const signOut = async () => {
-  const { error } = await supabase.auth.signOut()
-  return { error }
-}
-
-// Email-only authentication (simplified for prototype)
-export const signInWithEmail = async (email) => {
-  try {
-    localStorage.setItem("user_email", email)
-
-    // Get user data from profiles table
-    const { data: profile, error } = await getProfile(email)
-
-    if (profile) {
-      // Save user session data for returning user flow
-      saveUserSession({
-        email: email,
-        fullName: profile.real_name || "User",
-        creatorName: profile.creator_name || "Creator",
-        aboutYou: profile.description || "",
-        avatarColor: profile.avatar_color || "#01A569",
-      })
-
-      localStorage.setItem("user_name", profile.real_name || "User")
-      localStorage.setItem("creator_name", profile.creator_name || "Creator")
-    }
-
-    return { error: null }
-  } catch (error) {
-    console.error("Sign in error:", error)
-    return { error }
-  }
-}
-
-// Update getCurrentUser to handle our simplified auth
-export const getCurrentUser = async () => {
-  try {
-    // For prototype: get user info from localStorage
-    const email = localStorage.getItem("user_email")
-    const name = localStorage.getItem("user_name")
-    const creatorName = localStorage.getItem("creator_name")
-
-    if (email) {
-      return {
-        id: `user_${email.replace(/[^a-zA-Z0-9]/g, "_")}`,
-        email: email,
-        user_metadata: {
-          full_name: name || "User",
-          creator_name: creatorName || "Creator",
-        },
-      }
-    }
-
-    return null
-  } catch (error) {
-    console.error("Error getting current user:", error)
-    return null
-  }
-}
-
 // Profile Management
-export const createProfile = async (profileData, contactData) => {
+export const createProfile = async (profileData) => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
     const { data, error } = await supabase
       .from("profiles")
       .insert([{
-        id: user.id,
+        id: profileData.id, // Use the provided ID (generated in form-context)
         creator_name: profileData.creatorName,
-        full_name: contactData.fullName,
+        full_name: profileData.fullName,
         description: profileData.aboutYou,
         avatar_url: profileData.avatarUrl,
+        avatar_color: profileData.avatarColor,
       }])
       .select()
       .single()
@@ -130,54 +29,20 @@ export const createProfile = async (profileData, contactData) => {
   }
 }
 
-export const getProfile = async () => {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single()
-
-    return { data, error }
-  } catch (error) {
-    console.error("Get profile error:", error)
-    return { data: null, error }
-  }
-}
-
-export const updateProfile = async (updates) => {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
-    const { data, error } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("id", user.id)
-      .select()
-      .single()
-
-    return { data, error }
-  } catch (error) {
-    console.error("Update profile error:", error)
-    return { data: null, error }
-  }
-}
-
 // Artwork Management
 export const createArtwork = async (artworkData) => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
     const { data, error } = await supabase
       .from("artworks")
       .insert([{
-        profile_id: user.id,
-        ...artworkData
+        profile_id: artworkData.profile_id,
+        title: artworkData.title,
+        description: artworkData.description,
+        category: artworkData.category,
+        image_url: artworkData.image_url,
+        include_process: artworkData.include_process,
+        process_description: artworkData.process_description,
+        process_images: artworkData.process_images,
       }])
       .select()
       .single()
@@ -190,76 +55,29 @@ export const createArtwork = async (artworkData) => {
   }
 }
 
-export const getUserArtworks = async () => {
+// Voting function for the museum interface
+export const addVote = async (profileId, voterEmail) => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
     const { data, error } = await supabase
-      .from("artworks")
-      .select("*")
-      .eq("profile_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(3)
-
-    return { data, error }
-  } catch (error) {
-    console.error("Get user artworks error:", error)
-    return { data: null, error }
-  }
-}
-
-export const updateArtwork = async (artworkId, updates) => {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
-    const { data, error } = await supabase
-      .from("artworks")
-      .update(updates)
-      .eq("id", artworkId)
-      .eq("profile_id", user.id)
+      .from("votes")
+      .insert([{ profile_id: profileId, voter_email: voterEmail }])
       .select()
       .single()
 
-    return { data, error }
+    if (error) throw error
+    return { data, error: null }
   } catch (error) {
-    console.error("Update artwork error:", error)
+    console.error("Add vote error:", error)
     return { data: null, error }
-  }
-}
-
-export const deleteArtwork = async (artworkId) => {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
-    const { error } = await supabase
-      .from("artworks")
-      .delete()
-      .eq("id", artworkId)
-      .eq("profile_id", user.id)
-
-    return { error }
-  } catch (error) {
-    console.error("Delete artwork error:", error)
-    return { error }
   }
 }
 
 // File Upload
 export const uploadFile = async (file, bucket, path, retries = 3) => {
   try {
-    // Get the current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError) throw authError
-
-    // Create path with user ID
-    const userPath = `${user.id}/${path}`
-
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
-        const { data, error } = await supabase.storage.from(bucket).upload(userPath, file, {
+        const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
           cacheControl: "3600",
           upsert: true, // Allow overwriting existing files
         })
@@ -294,7 +112,7 @@ export const getFileUrl = (bucket, path) => {
 }
 
 /**
- * Saves submission data with error handling and retry logic
+ * Saves submission data (profile and artworks)
  * @param {Object} submissionData - Submission data to save
  * @returns {Promise<{data: any, error: Error|null}>} Save result
  */
@@ -302,37 +120,72 @@ export async function saveSubmission(submissionData) {
   try {
     console.log("Attempting to save submission:", submissionData)
 
-    // First create the profile
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .insert([{
-        creator_name: submissionData.creator_name,
-        full_name: submissionData.contact_name,
-        description: submissionData.about_you,
-        avatar_url: submissionData.avatar_image,
-      }])
-      .select()
-      .single()
+    // Generate a UUID for the profile
+    const profileId = crypto.randomUUID()
+
+    // Upload avatar image if present and valid
+    let avatarUrl = null
+    if (submissionData.avatar_image instanceof File && submissionData.avatar_image.name) {
+      const avatarFile = submissionData.avatar_image
+      const avatarFileName = avatarFile.name.replace(/\s/g, '_')
+      const avatarPath = `${profileId}/avatar/${Date.now()}_${avatarFileName}`
+      const { data: avatarData, error: avatarUploadError } = await uploadFile(avatarFile, "avatars", avatarPath)
+      if (avatarUploadError) console.error("Avatar upload error:", avatarUploadError)
+      avatarUrl = avatarData ? getFileUrl("avatars", avatarPath) : null
+    } else if (submissionData.avatar_image) {
+      console.warn("Avatar image provided is not a valid File object or is missing a name.", submissionData.avatar_image);
+    }
+
+    // Create the profile
+    const { data: profile, error: profileError } = await createProfile({
+      id: profileId,
+      creatorName: submissionData.creator_name,
+      fullName: submissionData.contact_name,
+      aboutYou: submissionData.about_you,
+      avatarUrl: avatarUrl, // Use the uploaded avatar URL
+      avatarColor: submissionData.avatar_color,
+    })
 
     if (profileError) {
       console.error("Profile creation error:", profileError)
       throw profileError
     }
 
-    // Then create the artworks
-    const artworkPromises = submissionData.artworks.map(artwork =>
-      supabase
-        .from("artworks")
-        .insert([{
-          profile_id: profile.id,
-          title: artwork.title,
-          description: artwork.description,
-          image_url: artwork.images[0] || null,
-          process_images: artwork.processImages || [],
-        }])
-        .select()
-        .single()
-    )
+    // Process and create artworks
+    const artworkPromises = submissionData.artworks.map(async (artwork) => {
+      // Upload artwork images
+      let imageUrl = null
+      if (artwork.images && artwork.images.length > 0) {
+        const imageFile = artwork.images[0]
+        const imagePath = `${profileId}/artworks/${Date.now()}_${imageFile.name.replace(/\s/g, '_')}`
+        const { data: imageData, error: imageError } = await uploadFile(imageFile, "artworks", imagePath)
+        if (imageError) console.error("Artwork image upload error:", imageError)
+        imageUrl = imageData ? getFileUrl("artworks", imagePath) : null
+      }
+
+      // Upload process images
+      const processImageUrls = []
+      if (artwork.processImages && artwork.processImages.length > 0) {
+        for (let i = 0; i < artwork.processImages.length; i++) {
+          const processImageFile = artwork.processImages[i]
+          const processPath = `${profileId}/process_images/${Date.now()}_${i}_${processImageFile.name.replace(/\s/g, '_')}`
+          const { data: processData, error: processError } = await uploadFile(processImageFile, "artworks", processPath)
+          if (processError) console.error("Process image upload error:", processError)
+          if (processData) processImageUrls.push(getFileUrl("artworks", processPath))
+        }
+      }
+
+      return createArtwork({
+        profile_id: profile.id,
+        title: artwork.title,
+        description: artwork.description,
+        category: artwork.category,
+        image_url: imageUrl,
+        include_process: artwork.include_process,
+        process_description: artwork.process_description,
+        process_images: processImageUrls,
+      })
+    })
 
     const artworkResults = await Promise.all(artworkPromises)
     const artworkErrors = artworkResults.filter(result => result.error)
@@ -346,59 +199,6 @@ export async function saveSubmission(submissionData) {
     return { data: { profile, artworks: artworkResults }, error: null }
   } catch (error) {
     console.error("Save submission error:", error)
-    return { data: null, error }
-  }
-}
-
-export const getUserSubmissions = async (userId) => {
-  try {
-    const { data, error } = await supabase
-      .from("submissions")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-    return { data, error }
-  } catch (error) {
-    console.error("Error getting user submissions:", error)
-    return { data: null, error }
-  }
-}
-
-export const updateSubmission = async (id, updates) => {
-  try {
-    const { data, error } = await supabase.from("submissions").update(updates).eq("id", id).select()
-    return { data, error }
-  } catch (error) {
-    console.error("Error updating submission:", error)
-    return { data: null, error }
-  }
-}
-
-export const deleteSubmission = async (id) => {
-  try {
-    const { error } = await supabase.from("submissions").delete().eq("id", id)
-    return { error }
-  } catch (error) {
-    console.error("Error deleting submission:", error)
-    return { error }
-  }
-}
-
-/**
- * Gets all submissions for public display
- * @returns {Promise<{data: Array, error: Error|null}>} Submissions data
- */
-export const getPublicSubmissions = async () => {
-  try {
-    const { data, error } = await supabase
-      .from("submissions")
-      .select("*")
-      .eq("status", "approved")
-      .order("created_at", { ascending: false })
-
-    return { data, error }
-  } catch (error) {
-    console.error("Error getting public submissions:", error)
     return { data: null, error }
   }
 }

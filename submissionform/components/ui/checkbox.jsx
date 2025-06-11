@@ -11,12 +11,11 @@ export const Checkbox = ({
     name,
     ...props
 }) => {
-    const handleChange = (e) => {
-        if (onChange) {
-            onChange(e)
-        }
+    const handleInputChange = (e) => {
         if (onCheckedChange) {
             onCheckedChange(e.target.checked)
+        } else if (onChange) {
+            onChange(e)
         }
     }
 
@@ -25,7 +24,7 @@ export const Checkbox = ({
             <input
                 type="checkbox"
                 checked={checked}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 disabled={disabled}
                 className="ui-checkbox"
                 id={id}

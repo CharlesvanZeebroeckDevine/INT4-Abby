@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useReducer, useEffect } from "react"
+import { createContext, useContext, useReducer } from "react"
 import { storeFormProgress, getFormProgress, clearFormProgress } from "../lib/offline-manager"
 import { createProfile, createArtwork, saveSubmission } from "../lib/supabase"
 
@@ -30,14 +30,15 @@ const getInitialState = () => {
     profile: {
       creatorName: "",
       aboutYou: "",
-    },
-    contact: {
       fullName: "",
       email: "",
     },
     avatar: {
       eyeImage: null,
       selectedColor: "#01A569",
+      scale: 1,
+      panX: 0,
+      panY: 0,
     },
     artworks: [],
     isSubmitting: false,
@@ -59,9 +60,6 @@ function formReducer(state, action) {
       break
     case "UPDATE_PROFILE":
       newState = { ...state, profile: { ...state.profile, ...action.payload } }
-      break
-    case "UPDATE_CONTACT":
-      newState = { ...state, contact: { ...state.contact, ...action.payload } }
       break
     case "UPDATE_AVATAR":
       newState = { ...state, avatar: { ...state.avatar, ...action.payload } }
@@ -159,30 +157,6 @@ function formReducer(state, action) {
 export function FormProvider({ children }) {
   const [state, dispatch] = useReducer(formReducer, null, getInitialState)
 
-  // Handle online/offline status
-  useEffect(() => {
-    const handleOnline = () => {
-      dispatch({ type: "SET_OFFLINE_MODE", payload: false })
-      console.log("Back online")
-    }
-
-    const handleOffline = () => {
-      dispatch({ type: "SET_OFFLINE_MODE", payload: true })
-      console.log("Gone offline")
-    }
-
-    window.addEventListener("online", handleOnline)
-    window.addEventListener("offline", handleOffline)
-
-    // Set initial offline state
-    dispatch({ type: "SET_OFFLINE_MODE", payload: !navigator.onLine })
-
-    return () => {
-      window.removeEventListener("online", handleOnline)
-      window.removeEventListener("offline", handleOffline)
-    }
-  }, [])
-
   // Enhanced dispatch with error handling
   const enhancedDispatch = (action) => {
     try {
@@ -205,15 +179,21 @@ export function FormProvider({ children }) {
       const submissionData = {
         creator_name: state.profile.creatorName,
         about_you: state.profile.aboutYou,
-        contact_name: state.contact.fullName,
-        contact_email: state.contact.email,
-        avatar_image: state.avatar.eyeImage ? URL.createObjectURL(state.avatar.eyeImage) : null,
+        contact_name: state.profile.fullName,
+        contact_email: state.profile.email,
+        avatar_image: state.avatar.eyeImage,
         avatar_color: state.avatar.selectedColor,
+        avatar_scale: state.avatar.scale,
+        avatar_panX: state.avatar.panX,
+        avatar_panY: state.avatar.panY,
         artworks: state.artworks.map(artwork => ({
           title: artwork.title,
           description: artwork.description,
           images: artwork.images,
           processImages: artwork.processImages || [],
+          category: artwork.category,
+          include_process: artwork.includeProcess,
+          process_description: artwork.processDescription,
         })),
       }
 
@@ -221,8 +201,8 @@ export function FormProvider({ children }) {
 
       if (error) throw error
 
-      // Clear form and redirect to success page
-      dispatch({ type: "RESET_FORM" })
+      // Do NOT clear form immediately, let SuccessPage consume data
+      // dispatch({ type: "RESET_FORM" })
       return { success: true, data }
     } catch (error) {
       console.error("Form submission error:", error)

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { Input } from "../../components/ui/input"
 import { useForm } from "../../contexts/form-context"
 import { saveSubmission, uploadFile } from "../../lib/supabase"
-import { storeOfflineSubmission } from "../../lib/offline-manager"
 import { validators, validateForm } from "../../utils/validation"
 import { Layout } from "../../components/layout"
 

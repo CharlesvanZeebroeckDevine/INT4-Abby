@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
 import { useForm } from "../../contexts/form-context"
-import Link from "next/link"
 import { Layout } from "../../components/ui/layout"
 
 export default function SuccessPage() {
@@ -63,19 +62,20 @@ export default function SuccessPage() {
   return (
     <Layout title="SUCCESS!" subtitle="Your story is now part of the creative reflection at Abby" currentStep={4}>
       <div className="abby-success-page">
-        <div className="abby-success-icon">
-          <div className="abby-success-check">✓</div>
-        </div>
-
+        <h1>Succes!</h1>
+        <p>Your story is now apart of the creative reflection at abby</p>
         {/* Submission Preview */}
         <div className="abby-submission-preview">
           <div className="abby-creator-info">
-            {state.avatar.eyeImage && (
-              <div className="abby-avatar-thumbnail" style={{ borderColor: state.avatar.selectedColor }}>
+            {state.profile.avatar_url && (
+              <div className="abby-avatar-thumbnail" style={{ borderColor: state.profile.avatar_color || '#01A569' }}>
                 <img
-                  src={URL.createObjectURL(state.avatar.eyeImage) || "/placeholder.svg"}
+                  src={state.profile.avatar_url || "/placeholder.svg"}
                   alt="Eye avatar"
                   className="abby-eye-preview-image"
+                  style={{
+                    transform: `scale(${state.avatar.scale || 1}) translate(${state.avatar.panX / (state.avatar.scale || 1)}px, ${state.avatar.panY / (state.avatar.scale || 1)}px)`,
+                  }}
                 />
               </div>
             )}
@@ -90,9 +90,9 @@ export default function SuccessPage() {
             {state.artworks.map((artwork, index) => (
               <div key={index} className="abby-artwork-preview">
                 <div className="abby-artwork-preview-content">
-                  {artwork.images[0] && (
+                  {artwork.image_url && (
                     <div className="abby-artwork-image">
-                      <img src={URL.createObjectURL(artwork.images[0]) || "/placeholder.svg"} alt={artwork.title} />
+                      <img src={artwork.image_url || "/placeholder.svg"} alt={artwork.title} />
                     </div>
                   )}
                   <div className="abby-artwork-info">
@@ -115,12 +115,6 @@ export default function SuccessPage() {
           <Button onClick={handleDownload} variant="outline" className="abby-button-full abby-button-outline">
             Download Summary
           </Button>
-
-          <Link href="/dashboard">
-            <Button variant="outline" className="abby-button-full abby-button-outline">
-              Edit Submission
-            </Button>
-          </Link>
         </div>
 
         {/* Next Steps */}
