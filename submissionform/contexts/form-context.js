@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useReducer, useEffect } from "react"
 import { storeFormProgress, getFormProgress, clearFormProgress } from "../lib/offline-manager"
+import { createProfile, createArtwork, saveSubmission } from "../lib/supabase"
 
 const FormContext = createContext()
 
@@ -30,15 +31,15 @@ const getInitialState = () => {
       creatorName: "",
       aboutYou: "",
     },
+    contact: {
+      fullName: "",
+      email: "",
+    },
     avatar: {
       eyeImage: null,
       selectedColor: "#01A569",
     },
     artworks: [],
-    contact: {
-      fullName: "",
-      email: "",
-    },
     isSubmitting: false,
     isOffline: false,
     errors: {},
@@ -58,6 +59,9 @@ function formReducer(state, action) {
       break
     case "UPDATE_PROFILE":
       newState = { ...state, profile: { ...state.profile, ...action.payload } }
+      break
+    case "UPDATE_CONTACT":
+      newState = { ...state, contact: { ...state.contact, ...action.payload } }
       break
     case "UPDATE_AVATAR":
       newState = { ...state, avatar: { ...state.avatar, ...action.payload } }
@@ -79,9 +83,6 @@ function formReducer(state, action) {
         artworks: state.artworks.filter((_, index) => index !== action.index),
       }
       break
-    case "UPDATE_CONTACT":
-      newState = { ...state, contact: { ...state.contact, ...action.payload } }
-      break
     case "SET_SUBMITTING":
       newState = { ...state, isSubmitting: action.payload }
       break
@@ -101,14 +102,6 @@ function formReducer(state, action) {
       return getInitialState()
     case "RESTORE_FROM_STORAGE":
       return { ...state, ...action.payload }
-    case "BATCH_UPDATE":
-      newState = {
-        ...state,
-        profile: { ...state.profile, ...action.payload.profile },
-        contact: { ...state.contact, ...action.payload.contact },
-        avatar: { ...state.avatar, ...action.payload.avatar },
-      }
-      break
     default:
       return state
   }
@@ -198,27 +191,56 @@ export function FormProvider({ children }) {
       console.error("Error in form dispatch:", error)
       dispatch({
         type: "SET_ERRORS",
-        payload: {
-          general: "An error occurred while updating the form. Please try again.",
-        },
+        payload: { form: "An error occurred while updating the form" },
       })
     }
   }
 
-  const contextValue = {
-    state,
-    dispatch: enhancedDispatch,
-    // Helper functions
-    clearForm: () => enhancedDispatch({ type: "RESET_FORM" }),
-    clearErrors: () => enhancedDispatch({ type: "CLEAR_ERRORS" }),
-    setError: (field, message) =>
-      enhancedDispatch({
+  // Submit form data to Supabase
+  const submitForm = async () => {
+    try {
+      dispatch({ type: "SET_SUBMITTING", payload: true })
+      dispatch({ type: "CLEAR_ERRORS" })
+
+      const submissionData = {
+        creator_name: state.profile.creatorName,
+        about_you: state.profile.aboutYou,
+        contact_name: state.contact.fullName,
+        contact_email: state.contact.email,
+        avatar_image: state.avatar.eyeImage ? URL.createObjectURL(state.avatar.eyeImage) : null,
+        avatar_color: state.avatar.selectedColor,
+        artworks: state.artworks.map(artwork => ({
+          title: artwork.title,
+          description: artwork.description,
+          images: artwork.images,
+          processImages: artwork.processImages || [],
+        })),
+      }
+
+      const { data, error } = await saveSubmission(submissionData)
+
+      if (error) throw error
+
+      // Clear form and redirect to success page
+      dispatch({ type: "RESET_FORM" })
+      return { success: true, data }
+    } catch (error) {
+      console.error("Form submission error:", error)
+      dispatch({
         type: "SET_ERRORS",
-        payload: { ...state.errors, [field]: message },
-      }),
+        payload: { submit: error.message || "Failed to submit form" },
+      })
+      return { success: false, error }
+    } finally {
+      dispatch({ type: "SET_SUBMITTING", payload: false })
+    }
   }
 
-  return <FormContext.Provider value={contextValue}>{children}</FormContext.Provider>
+  return (
+    <FormContext.Provider value={{ state, dispatch: enhancedDispatch, submitForm }}>
+      {children}
+    </FormContext.Provider>
+  )
 }
 
 /**

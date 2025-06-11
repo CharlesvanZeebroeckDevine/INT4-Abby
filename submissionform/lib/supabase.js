@@ -52,31 +52,23 @@ export const signOut = async () => {
 // Email-only authentication (simplified for prototype)
 export const signInWithEmail = async (email) => {
   try {
-    // For prototype: just store the email and simulate success
     localStorage.setItem("user_email", email)
 
-    // Try to get user data from submissions table
-    const { data } = await supabase
-      .from("submissions")
-      .select("*")
-      .eq("contact_email", email)
-      .order("created_at", { ascending: false })
-      .limit(1)
+    // Get user data from profiles table
+    const { data: profile, error } = await getProfile(email)
 
-    if (data && data.length > 0) {
-      const submission = data[0]
-
+    if (profile) {
       // Save user session data for returning user flow
       saveUserSession({
         email: email,
-        fullName: submission.contact_name || "User",
-        creatorName: submission.creator_name || "Creator",
-        aboutYou: submission.about_you || "",
-        avatarColor: submission.avatar_color || "#01A569",
+        fullName: profile.real_name || "User",
+        creatorName: profile.creator_name || "Creator",
+        aboutYou: profile.description || "",
+        avatarColor: profile.avatar_color || "#01A569",
       })
 
-      localStorage.setItem("user_name", submission.contact_name || "User")
-      localStorage.setItem("creator_name", submission.creator_name || "Creator")
+      localStorage.setItem("user_name", profile.real_name || "User")
+      localStorage.setItem("creator_name", profile.creator_name || "Creator")
     }
 
     return { error: null }
@@ -112,40 +104,193 @@ export const getCurrentUser = async () => {
   }
 }
 
-/**
- * Uploads a file to Supabase storage with retry mechanism
- * @param {File} file - The file to upload
- * @param {string} bucket - The storage bucket name
- * @param {string} path - The file path within the bucket
- * @param {number} retries - Number of retry attempts
- * @returns {Promise<{data: any, error: Error|null}>} Upload result
- */
-export const uploadFile = async (file, bucket, path, retries = 3) => {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-      })
+// Profile Management
+export const createProfile = async (profileData, contactData) => {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
 
-      if (error) {
-        if (attempt === retries - 1) {
-          throw error
-        }
-        console.warn(`Upload attempt ${attempt + 1} failed, retrying...`, error)
-        await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)))
-        continue
-      }
+    const { data, error } = await supabase
+      .from("profiles")
+      .insert([{
+        id: user.id,
+        creator_name: profileData.creatorName,
+        full_name: contactData.fullName,
+        description: profileData.aboutYou,
+        avatar_url: profileData.avatarUrl,
+      }])
+      .select()
+      .single()
 
-      return { data, error: null }
-    } catch (error) {
-      if (attempt === retries - 1) {
-        console.error("Upload failed after all retries:", error)
-        return { data: null, error }
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)))
-    }
+    if (error) throw error
+    return { data, error: null }
+  } catch (error) {
+    console.error("Create profile error:", error)
+    return { data: null, error }
   }
+}
+
+export const getProfile = async () => {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single()
+
+    return { data, error }
+  } catch (error) {
+    console.error("Get profile error:", error)
+    return { data: null, error }
+  }
+}
+
+export const updateProfile = async (updates) => {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", user.id)
+      .select()
+      .single()
+
+    return { data, error }
+  } catch (error) {
+    console.error("Update profile error:", error)
+    return { data: null, error }
+  }
+}
+
+// Artwork Management
+export const createArtwork = async (artworkData) => {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+
+    const { data, error } = await supabase
+      .from("artworks")
+      .insert([{
+        profile_id: user.id,
+        ...artworkData
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return { data, error: null }
+  } catch (error) {
+    console.error("Create artwork error:", error)
+    return { data: null, error }
+  }
+}
+
+export const getUserArtworks = async () => {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+
+    const { data, error } = await supabase
+      .from("artworks")
+      .select("*")
+      .eq("profile_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(3)
+
+    return { data, error }
+  } catch (error) {
+    console.error("Get user artworks error:", error)
+    return { data: null, error }
+  }
+}
+
+export const updateArtwork = async (artworkId, updates) => {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+
+    const { data, error } = await supabase
+      .from("artworks")
+      .update(updates)
+      .eq("id", artworkId)
+      .eq("profile_id", user.id)
+      .select()
+      .single()
+
+    return { data, error }
+  } catch (error) {
+    console.error("Update artwork error:", error)
+    return { data: null, error }
+  }
+}
+
+export const deleteArtwork = async (artworkId) => {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+
+    const { error } = await supabase
+      .from("artworks")
+      .delete()
+      .eq("id", artworkId)
+      .eq("profile_id", user.id)
+
+    return { error }
+  } catch (error) {
+    console.error("Delete artwork error:", error)
+    return { error }
+  }
+}
+
+// File Upload
+export const uploadFile = async (file, bucket, path, retries = 3) => {
+  try {
+    // Get the current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError) throw authError
+
+    // Create path with user ID
+    const userPath = `${user.id}/${path}`
+
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const { data, error } = await supabase.storage.from(bucket).upload(userPath, file, {
+          cacheControl: "3600",
+          upsert: true, // Allow overwriting existing files
+        })
+
+        if (error) {
+          if (attempt === retries - 1) {
+            throw error
+          }
+          console.warn(`Upload attempt ${attempt + 1} failed, retrying...`, error)
+          await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)))
+          continue
+        }
+
+        return { data, error: null }
+      } catch (error) {
+        if (attempt === retries - 1) {
+          console.error("Upload failed after all retries:", error)
+          return { data: null, error }
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)))
+      }
+    }
+  } catch (error) {
+    console.error("Upload error:", error)
+    return { data: null, error }
+  }
+}
+
+export const getFileUrl = (bucket, path) => {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+  return data.publicUrl
 }
 
 /**
@@ -157,16 +302,48 @@ export async function saveSubmission(submissionData) {
   try {
     console.log("Attempting to save submission:", submissionData)
 
-    // Use admin client to bypass RLS policies
-    const { data, error } = await supabaseAdmin.from("submissions").insert([submissionData]).select()
+    // First create the profile
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .insert([{
+        creator_name: submissionData.creator_name,
+        full_name: submissionData.contact_name,
+        description: submissionData.about_you,
+        avatar_url: submissionData.avatar_image,
+      }])
+      .select()
+      .single()
 
-    if (error) {
-      console.error("Database error:", error)
-      throw error
+    if (profileError) {
+      console.error("Profile creation error:", profileError)
+      throw profileError
     }
 
-    console.log("Submission saved successfully:", data)
-    return { data, error: null }
+    // Then create the artworks
+    const artworkPromises = submissionData.artworks.map(artwork =>
+      supabase
+        .from("artworks")
+        .insert([{
+          profile_id: profile.id,
+          title: artwork.title,
+          description: artwork.description,
+          image_url: artwork.images[0] || null,
+          process_images: artwork.processImages || [],
+        }])
+        .select()
+        .single()
+    )
+
+    const artworkResults = await Promise.all(artworkPromises)
+    const artworkErrors = artworkResults.filter(result => result.error)
+
+    if (artworkErrors.length > 0) {
+      console.error("Artwork creation errors:", artworkErrors)
+      throw new Error("Failed to create some artworks")
+    }
+
+    console.log("Submission saved successfully:", { profile, artworks: artworkResults })
+    return { data: { profile, artworks: artworkResults }, error: null }
   } catch (error) {
     console.error("Save submission error:", error)
     return { data: null, error }
@@ -207,16 +384,6 @@ export const deleteSubmission = async (id) => {
   }
 }
 
-export const getFileUrl = (bucket, path) => {
-  try {
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
-    return data.publicUrl
-  } catch (error) {
-    console.error("Error getting file URL:", error)
-    return null
-  }
-}
-
 /**
  * Gets all submissions for public display
  * @returns {Promise<{data: Array, error: Error|null}>} Submissions data
@@ -232,37 +399,6 @@ export const getPublicSubmissions = async () => {
     return { data, error }
   } catch (error) {
     console.error("Error getting public submissions:", error)
-    return { data: null, error }
-  }
-}
-
-/**
- * Adds a vote to a submission
- * @param {string} submissionId - Submission ID
- * @param {string} voterInfo - Voter identification (IP or session)
- * @returns {Promise<{data: any, error: Error|null}>} Vote result
- */
-export const addVote = async (submissionId, voterInfo) => {
-  try {
-    const { data, error } = await supabase
-      .from("votes")
-      .insert([
-        {
-          submission_id: submissionId,
-          voter_ip: voterInfo.ip,
-          voter_session: voterInfo.session,
-        },
-      ])
-      .select()
-
-    if (!error) {
-      // Update submission vote count
-      await supabase.rpc("increment_votes", { submission_id: submissionId })
-    }
-
-    return { data, error }
-  } catch (error) {
-    console.error("Error adding vote:", error)
     return { data: null, error }
   }
 }

@@ -60,7 +60,7 @@ export const FileUpload = ({
   className = "",
   disabled = false,
   error = false,
-  ...props
+  debugLabel,
 }) => {
   const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState({})
@@ -79,12 +79,12 @@ export const FileUpload = ({
     e.preventDefault()
     setIsDragging(false)
     const files = Array.from(e.dataTransfer.files)
-    onFilesChange(files)
+    handleFiles(files)
   }
 
   const handleFileInput = (e) => {
     const files = Array.from(e.target.files)
-    onFilesChange(files)
+    handleFiles(files)
   }
 
   const uploadClasses = [
@@ -180,7 +180,7 @@ export const FileUpload = ({
         onChange={handleFileInput}
         disabled={disabled}
         className="ui-file-input"
-        {...props}
+        aria-label="File upload"
       />
       <div className="ui-file-upload-content">
         <p>Drag and drop files here, or click to select files</p>
