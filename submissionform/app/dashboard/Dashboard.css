@@ -411,7 +411,6 @@
 .loading-spinner {
     width: 3rem;
     height: 3rem;
-    border: 4px solid var(--abby-green);
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 1s linear infinite;
