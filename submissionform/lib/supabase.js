@@ -120,7 +120,7 @@ export async function saveSubmission(submissionData) {
   try {
     console.log("Attempting to save submission:", submissionData)
 
-    // Generate a UUID for the profile
+    // Generate a UUID for the profile Needs fix doesn't work on localhost netwrork
     const profileId = crypto.randomUUID()
 
     // Upload avatar image if present and valid
