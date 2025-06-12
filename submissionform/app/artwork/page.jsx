@@ -10,7 +10,7 @@ import { FileUpload } from "../../components/file-upload"
 import { Layout } from "../../components/layout"
 import { useForm } from "../../contexts/form-context"
 
-const categories = ["Painting", "Handcrafts", "Digital art", "Food", "Photography", "Sculpture", "Mixed Media", "Other"]
+const categories = ["Painting", "Handcrafts", "Digital art", "Photography", "Sculpture", "Other"]
 
 export default function ArtworkPage() {
   const router = useRouter()
