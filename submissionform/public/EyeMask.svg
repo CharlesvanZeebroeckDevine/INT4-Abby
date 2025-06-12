@@ -1,3 +1,7 @@
-<svg width="104" height="75" viewBox="0 0 104 75" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0 49.8477L51.582 74.1602L103.164 49.8457V24.3125L51.582 0L0 24.3145V49.8477Z" fill="#5F90FF"/>
+<svg width="461" height="331" viewBox="0 0 461 331" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+    <clipPath id="eye-mask-clip">
+        <path d="M230.498 330.996L0 222.481V108.519L230.498 0L461 108.51V222.473L230.498 330.996Z"/>
+    </clipPath>
+</defs>
 </svg>

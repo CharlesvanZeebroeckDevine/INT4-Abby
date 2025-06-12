@@ -111,11 +111,15 @@ function formReducer(state, action) {
   if (typeof window !== "undefined" && action.type !== "SET_SUBMITTING") {
     const stateForStorage = { ...newState }
 
-    // Don't try to serialize File objects
+    // Don't try to serialize File objects or Blobs
     if (stateForStorage.avatar?.eyeImage instanceof File) {
       stateForStorage.avatar = { ...stateForStorage.avatar, eyeImage: null }
     }
 
+    // Don't try to serialize exported blob
+    if (stateForStorage.avatar?.exportedFile instanceof Blob) {
+      stateForStorage.avatar = { ...stateForStorage.avatar, exportedFile: null }
+    }
     // Handle artwork files
     if (stateForStorage.artworks?.length) {
       stateForStorage.artworks = stateForStorage.artworks.map((artwork) => {
@@ -181,11 +185,8 @@ export function FormProvider({ children }) {
         about_you: state.profile.aboutYou,
         contact_name: state.profile.fullName,
         contact_email: state.profile.email,
-        avatar_image: state.avatar.eyeImage,
-        avatar_color: state.avatar.selectedColor,
-        avatar_scale: state.avatar.scale,
-        avatar_panX: state.avatar.panX,
-        avatar_panY: state.avatar.panY,
+        // Use the exported canvas blob instead of original eye image
+        avatar_image: state.avatar.exportedFile || state.avatar.eyeImage,
         artworks: state.artworks.map(artwork => ({
           title: artwork.title,
           description: artwork.description,
@@ -200,6 +201,11 @@ export function FormProvider({ children }) {
       const { data, error } = await saveSubmission(submissionData)
 
       if (error) throw error
+
+      // Update profile state with the returned avatar_url from the database
+      if (data && data.profile) {
+        dispatch({ type: "UPDATE_PROFILE", payload: { avatar_url: data.profile.avatar_url } })
+      }
 
       // Do NOT clear form immediately, let SuccessPage consume data
       // dispatch({ type: "RESET_FORM" })

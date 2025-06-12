@@ -68,14 +68,11 @@ export default function SuccessPage() {
         <div className="abby-submission-preview">
           <div className="abby-creator-info">
             {state.profile.avatar_url && (
-              <div className="abby-avatar-thumbnail" style={{ borderColor: state.profile.avatar_color || '#01A569' }}>
+              <div className="abby-avatar-thumbnail">
                 <img
                   src={state.profile.avatar_url || "/placeholder.svg"}
                   alt="Eye avatar"
                   className="abby-eye-preview-image"
-                  style={{
-                    transform: `scale(${state.avatar.scale || 1}) translate(${state.avatar.panX / (state.avatar.scale || 1)}px, ${state.avatar.panY / (state.avatar.scale || 1)}px)`,
-                  }}
                 />
               </div>
             )}

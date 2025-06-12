@@ -17,7 +17,6 @@ export const createProfile = async (profileData) => {
         email: profileData.email,
         description: profileData.aboutYou,
         avatar_url: profileData.avatarUrl,
-        avatar_color: profileData.avatarColor,
       }])
       .select()
       .single()
@@ -126,17 +125,30 @@ export async function saveSubmission(submissionData) {
 
     // Upload avatar image if present and valid
     let avatarUrl = null
-    if (submissionData.avatar_image instanceof File && submissionData.avatar_image.name) {
+    if (submissionData.avatar_image) { // Check if it exists
       const avatarFile = submissionData.avatar_image
-      const avatarFileName = avatarFile.name.replace(/\s/g, '_')
-      const avatarPath = `${profileId}/avatar/${Date.now()}_${avatarFileName}`
-      const { data: avatarData, error: avatarUploadError } = await uploadFile(avatarFile, "avatars", avatarPath)
-      if (avatarUploadError) console.error("Avatar upload error:", avatarUploadError)
-      avatarUrl = avatarData ? getFileUrl("avatars", avatarPath) : null
-    } else if (submissionData.avatar_image) {
-      console.warn("Avatar image provided is not a valid File object or is missing a name.", submissionData.avatar_image);
+      let avatarFileName;
+
+      if (avatarFile instanceof File) {
+        avatarFileName = avatarFile.name.replace(/\s/g, '_')
+      } else if (avatarFile instanceof Blob) {
+        // For blobs (e.g., from canvas.toBlob), create a generic name or use type
+        const fileExtension = avatarFile.type.split('/')[1] || 'jpeg'; // Default to jpeg if type not found
+        avatarFileName = `rendered_avatar_${Date.now()}.${fileExtension}`;
+      } else {
+        console.warn("Avatar image provided is not a valid File or Blob object.", avatarFile);
+        avatarFileName = null; // No valid file to upload
+      }
+
+      if (avatarFileName) {
+        const avatarPath = `${profileId}/avatar/${avatarFileName}`
+        const { data: avatarData, error: avatarUploadError } = await uploadFile(avatarFile, "avatars", avatarPath)
+        if (avatarUploadError) console.error("Avatar upload error:", avatarUploadError)
+        avatarUrl = avatarData ? getFileUrl("avatars", avatarPath) : null
+      }
     }
 
+    // Create the profile
     // Create the profile
     const { data: profile, error: profileError } = await createProfile({
       id: profileId,
@@ -145,7 +157,6 @@ export async function saveSubmission(submissionData) {
       email: submissionData.contact_email,
       aboutYou: submissionData.about_you,
       avatarUrl: avatarUrl, // Use the uploaded avatar URL
-      avatarColor: submissionData.avatar_color,
     })
 
     if (profileError) {
