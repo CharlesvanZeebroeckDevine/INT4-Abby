@@ -5,6 +5,22 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// UUID generation function that works across all environments
+function generateUUID() {
+  // Try to use crypto.randomUUID if available (modern browsers, Node.js 16+)
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+
+  // Fallback UUID v4 generation for older browsers/environments
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
+// Profile Management
 // Profile Management
 export const createProfile = async (profileData) => {
   try {
@@ -120,8 +136,8 @@ export async function saveSubmission(submissionData) {
   try {
     console.log("Attempting to save submission:", submissionData)
 
-    // Generate a UUID for the profile Needs fix doesn't work on localhost netwrork
-    const profileId = crypto.randomUUID()
+    // Generate a UUID for the profile using our cross-platform function
+    const profileId = generateUUID()
 
     // Upload avatar image if present and valid
     let avatarUrl = null
