@@ -216,7 +216,7 @@ export default function ArtworkPage() {
                     value={safeArtwork.description}
                     onChange={(e) => updateArtwork(index, "description", e.target.value)}
                     className="abby-textarea-primary"
-                    maxLength={300}
+                    maxLength={200}
                     error={!!errors[`${index}_description`]}
                     aria-describedby={
                       errors[`${index}_description`] ? `description-${index}-error` : `description-${index}-count`
@@ -229,7 +229,7 @@ export default function ArtworkPage() {
                       </p>
                     )}
                     <p id={`description-${index}-count`} className="abby-character-count" aria-live="polite">
-                      {safeArtwork.description.length}/300
+                      {safeArtwork.description.length}/200
                     </p>
                   </div>
                 </div>

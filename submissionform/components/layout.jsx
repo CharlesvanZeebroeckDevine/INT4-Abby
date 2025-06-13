@@ -82,20 +82,23 @@ export function Layout({
             </div>
           )}
         </div>
+        <div className="abby-instructions">
+          {title && (
+            <h1 className="abby-title" id="page-title">
+              {title}
+            </h1>
+          )}
+          {subtitle && (
+            <p className="abby-subtitle" aria-describedby="page-title">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Main Content */}
       <div className="abby-content">
-        {title && (
-          <h1 className="abby-title" id="page-title">
-            {title}
-          </h1>
-        )}
-        {subtitle && (
-          <p className="abby-subtitle" aria-describedby="page-title">
-            {subtitle}
-          </p>
-        )}
+
 
         <main role="main" aria-labelledby="page-title">
           {children}

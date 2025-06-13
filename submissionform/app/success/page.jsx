@@ -94,7 +94,6 @@ export default function SuccessPage() {
                   )}
                   <div className="abby-artwork-info">
                     <h5 className="abby-artwork-preview-title">{artwork.title}</h5>
-                    <p className="abby-artwork-preview-description">{artwork.description}</p>
                     <span className="abby-artwork-category">{artwork.category}</span>
                   </div>
                 </div>

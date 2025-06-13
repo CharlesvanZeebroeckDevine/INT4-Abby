@@ -35,6 +35,8 @@ body {
   border-radius: 0;
 }
 
+
+
 /* CSS Custom Properties */
 :root {
   --color-primary: #01a569;
@@ -96,10 +98,10 @@ body {
 /* Header */
 .abby-header {
   background-color: var(--header-blue);
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: 2rem 1rem 1rem 1rem;
   color: var(--color-black);
   position: sticky;
-  gap: 1rem;
+  gap: 2rem;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -108,7 +110,6 @@ body {
 .abby-header div {
   display: flex;
   justify-content: space-between;
-  flex-direction: row;
 }
 
 .abby-header-landing {
@@ -163,24 +164,25 @@ body {
 }
 
 /* Content */
+.abby-instructions {
+  display: flex;
+  flex-direction: column;
+}
+
 .abby-content {
   flex: 1;
-  padding: var(--spacing-xl);
   overflow-y: auto;
-  padding-bottom: 100px;
-  /* Extra padding to ensure content isn't hidden behind fixed footer */
+  padding: 1rem 1rem 10rem 1rem;
+
 }
 
 .abby-title {
   font-size: var(--font-size-2xl);
   font-weight: bold;
-  margin-bottom: var(--spacing-xs);
 }
 
 .abby-subtitle {
   font-size: var(--font-size-lg);
-  margin-bottom: var(--spacing-2xl);
-  color: var(--color-gray-600);
 }
 
 /* Footer */
@@ -294,6 +296,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
 }
 
 .abby-field-group {
@@ -311,7 +314,6 @@ body {
 .process-label {
   font-size: var(--font-size-base);
 }
-
 
 .abby-field-footer {
   display: flex;
@@ -713,7 +715,6 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  clip-path: polygon(0% 66.5%, 50% 100%, 100% 66.5%, 100% 33.5%, 50% 0%, 0% 33.5%);
 }
 
 /* Camera Capture Styles */
@@ -1064,29 +1065,23 @@ body {
 /* Category selection boxes */
 .abby-category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--spacing-md);
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
 
 .abby-category-box {
-  padding: var(--spacing-md);
   background-color: var(--color-gray-100);
-  border: 2px solid var(--color-gray-200);
-  border-radius: var(--border-radius);
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.abby-category-box:hover {
-  background-color: var(--color-gray-200);
-}
 
 .abby-category-selected {
   background-color: var(--color-primary);
   color: var(--color-white);
-  border-color: var(--color-primary);
+  border-color: var(--color-black);
 }
 
 /* Artwork Page Styles */
@@ -1097,9 +1092,7 @@ body {
 }
 
 .abby-artwork-item {
-  border: 2px solid var(--color-gray-100);
-  padding: var(--spacing-xl);
-  border-radius: var(--border-radius);
+  margin-top: 2rem;
 }
 
 .abby-artwork-header {
@@ -1119,8 +1112,6 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius);
 }
 
 .abby-remove-button:hover {
@@ -1196,8 +1187,6 @@ body {
 .abby-avatar-thumbnail {
   width: 64px;
   height: 64px;
-  border-radius: 50%;
-  border: 4px solid;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1259,13 +1248,8 @@ body {
 }
 
 .abby-artwork-preview-title {
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  margin-bottom: var(--spacing-sm);
-}
-
-.abby-artwork-preview-description {
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-600);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -1274,7 +1258,6 @@ body {
   background-color: rgba(1, 165, 105, 0.1);
   color: var(--color-primary);
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 9999px;
 }
 
 .abby-success-actions {
