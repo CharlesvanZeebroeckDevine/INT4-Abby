@@ -82,7 +82,7 @@ export default function ProfilePage() {
           </label>
           <Textarea
             id="aboutYou"
-            placeholder="Yourself in two sentences"
+            placeholder="Yourself in two sentences, you could talk about your inspirations, your hobbies, whatever..."
             value={state.profile.aboutYou}
             onChange={(e) => handleInputChange("aboutYou", e.target.value)}
             className="abby-textarea-primary"

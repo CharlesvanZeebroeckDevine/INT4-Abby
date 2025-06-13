@@ -1,8 +1,8 @@
 .ui-input {
+    font-family: GT Walsheim;
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.375rem;
+    border: 1px solid #000000;
     font-size: 0.875rem;
     line-height: 1.25rem;
     color: #111827;
@@ -23,7 +23,8 @@
 }
 
 .ui-input::placeholder {
-    color: #9ca3af;
+    font-family: GT Walsheim;
+    color: #252525;
 }
 
 .ui-input-error {
