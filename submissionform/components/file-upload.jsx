@@ -54,6 +54,7 @@ FileUploadItem.displayName = "FileUploadItem"
  */
 export const FileUpload = ({
   onFilesChange,
+  files = [],
   maxFiles = 5,
   maxSize = 6 * 1024 * 1024, // 6MB
   accept = "image/*",
@@ -85,6 +86,7 @@ export const FileUpload = ({
   const handleFileInput = (e) => {
     const files = Array.from(e.target.files)
     handleFiles(files)
+    e.target.value = ''
   }
 
   const uploadClasses = [
@@ -111,19 +113,17 @@ export const FileUpload = ({
           return true
         })
 
-        // Check if adding these files would exceed the maxFiles limit
-        const totalCount = validFiles.length
+        const totalCount = files.length + validFiles.length
 
         console.log(`Total: ${totalCount}, Max: ${maxFiles}`)
 
         if (totalCount > maxFiles) {
           alert(
-            `You can only upload up to ${maxFiles} files to this upload area. You currently have ${totalCount} files.`,
+            `You can only upload up to ${maxFiles} files to this upload area. You currently have ${files.length} files and are trying to add ${validFiles.length} more.`,
           )
           return
         }
 
-        // Optimize images before adding them
         const optimizedFiles = []
         for (let i = 0; i < validFiles.length; i++) {
           const file = validFiles[i]
@@ -132,7 +132,6 @@ export const FileUpload = ({
           setUploadProgress((prev) => ({ ...prev, [progressKey]: 0 }))
 
           if (isImageFile(file)) {
-            // Simulate progress for optimization
             setUploadProgress((prev) => ({ ...prev, [progressKey]: 25 }))
 
             const optimized = await optimizeImage(file)
@@ -145,14 +144,11 @@ export const FileUpload = ({
           }
         }
 
-        // Create the new files array
-        const newFilesArray = [...optimizedFiles]
+        const newFilesArray = [...files, ...optimizedFiles]
         console.log(`Calling onFilesChange with ${newFilesArray.length} files`)
 
-        // Directly pass the new files array
         onFilesChange(newFilesArray)
 
-        // Clear progress after a delay
         setTimeout(() => {
           setUploadProgress({})
         }, 1000)
@@ -163,7 +159,7 @@ export const FileUpload = ({
         setIsProcessing(false)
       }
     },
-    [maxFiles, maxSize, onFilesChange, isProcessing],
+    [maxFiles, maxSize, onFilesChange, isProcessing, files],
   )
 
   return (
@@ -181,11 +177,33 @@ export const FileUpload = ({
         disabled={disabled}
         className="ui-file-input"
         aria-label="File upload"
+        style={{ display: 'none' }}
+        id={`file-input-${debugLabel || 'default'}`}
       />
-      <div className="ui-file-upload-content">
+      <label
+        htmlFor={`file-input-${debugLabel || 'default'}`}
+        className="ui-file-upload-content"
+        style={{ cursor: 'pointer' }}
+      >
         <p>Drag and drop files here, or click to select files</p>
         <p className="ui-file-upload-hint">Maximum {maxFiles} files</p>
-      </div>
+      </label>
+      {files.length > 0 && (
+        <div className="abby-file-list">
+          {files.map((file, index) => (
+            <FileUploadItem
+              key={`${file.name}-${index}`}
+              file={file}
+              onRemove={() => {
+                const newFiles = files.filter((_, i) => i !== index)
+                onFilesChange(newFiles)
+              }}
+              progress={uploadProgress[index]}
+              index={index}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

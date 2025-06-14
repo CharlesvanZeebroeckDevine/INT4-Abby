@@ -56,6 +56,7 @@ export const createArtwork = async (artworkData) => {
         description: artworkData.description,
         category: artworkData.category,
         image_url: artworkData.image_url,
+        image_urls: artworkData.image_urls,
         include_process: artworkData.include_process,
         process_description: artworkData.process_description,
         process_images: artworkData.process_images,
@@ -183,13 +184,15 @@ export async function saveSubmission(submissionData) {
     // Process and create artworks
     const artworkPromises = submissionData.artworks.map(async (artwork) => {
       // Upload artwork images
-      let imageUrl = null
+      const imageUrls = []
       if (artwork.images && artwork.images.length > 0) {
-        const imageFile = artwork.images[0]
-        const imagePath = `${profileId}/artworks/${Date.now()}_${imageFile.name.replace(/\s/g, '_')}`
-        const { data: imageData, error: imageError } = await uploadFile(imageFile, "artworks", imagePath)
-        if (imageError) console.error("Artwork image upload error:", imageError)
-        imageUrl = imageData ? getFileUrl("artworks", imagePath) : null
+        for (let i = 0; i < artwork.images.length; i++) {
+          const imageFile = artwork.images[i]
+          const imagePath = `${profileId}/artworks/${Date.now()}_${i}_${imageFile.name.replace(/\s/g, '_')}`
+          const { data: imageData, error: imageError } = await uploadFile(imageFile, "artworks", imagePath)
+          if (imageError) console.error("Artwork image upload error:", imageError)
+          if (imageData) imageUrls.push(getFileUrl("artworks", imagePath))
+        }
       }
 
       // Upload process images
@@ -209,10 +212,11 @@ export async function saveSubmission(submissionData) {
         title: artwork.title,
         description: artwork.description,
         category: artwork.category,
-        image_url: imageUrl,
+        image_url: imageUrls[0], // Keep the first image as the main image
+        image_urls: imageUrls, // Store all artwork images
         include_process: artwork.include_process,
         process_description: artwork.process_description,
-        process_images: processImageUrls,
+        process_images: processImageUrls, // Store only process images
       })
     })
 
