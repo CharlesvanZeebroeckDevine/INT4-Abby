@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>See All - Creative Page</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="controller.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo"></div>
+        <img class="eye" src="/images/abby/eye.svg" alt="eye" />
+        <div class="lang">
+            <button class="underline">EN</button>
+            <button>NL</button>
+            <button>FR</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="grid-view-page">
+            <div class="search-section see-all-search">
+                <button class="back-to-carousel-btn">
+                    <img src="./images/abby/arrow.svg" alt="Back arrow" class="arrow" />
+                    BACK
+                </button>
+                <input type="text" placeholder="SEARCH" class="search-input search-input-see-all" />
+            </div>
+
+            <div class="category-bar">
+                <!-- Categories will be rendered here by controller.js -->
+            </div>
+
+            <div class="profiles-grid">
+                <!-- Profiles will be rendered here by controller.js -->
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

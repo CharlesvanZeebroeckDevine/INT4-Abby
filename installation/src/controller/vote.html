@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Vote - Creative Page</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="controller.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo"></div>
+        <img class="eye" src="/images/abby/eye.svg" alt="eye" />
+        <div class="lang">
+            <button class="underline">EN</button>
+            <button>NL</button>
+            <button>FR</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="vote-view-page">
+            <div class="voting-overlay">
+                <div class="voting-content">
+                    <div class="voting-profile-info">
+                        <!-- Profile info will be dynamically updated here -->
+                    </div>
+                    <form id="vote-form">
+                        <label for="voter-email">Your Email:</label>
+                        <input type="email" id="voter-email" name="email" required>
+                        <label>
+                            <input type="checkbox" name="receive_updates">
+                            Receive updates
+                        </label>
+                        <button type="submit">Submit Vote</button>
+                        <button type="button" class="cancel-vote-btn">Cancel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -3,14 +3,154 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vite App</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>ABBY Installation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 600px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 18px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-button {
+      display: inline-block;
+      padding: 15px 30px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background 0.3s;
+      min-width: 150px;
+    }
+
+    .nav-button:hover {
+      background: #0056b3;
+    }
+
+    .nav-button.monitor {
+      background: #28a745;
+    }
+
+    .nav-button.monitor:hover {
+      background: #1e7e34;
+    }
+
+    .info {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .status.connected {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
 </head>
 
 <body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.js"></script>
+  <div class="container">
+    <h1>🎨 ABBY Installation</h1>
+    <p class="subtitle">Museum Interactive Display System</p>
+
+    <div class="nav-buttons">
+      <a href="/src/controller/controller.html" class="nav-button">
+        📱 Controller<br>
+        <small>(iPad Interface)</small>
+      </a>
+      <a href="/src/monitor/monitor.html" class="nav-button monitor">
+        🖥️ Monitor<br>
+        <small>(Display Screen)</small>
+      </a>
+    </div>
+
+    <div class="info">
+      <strong>Setup Instructions:</strong><br>
+      1. Open <strong>Controller</strong> on the iPad<br>
+      2. Open <strong>Monitor</strong> on the display screen<br>
+      3. Use Arduino controls or keyboard shortcuts for testing
+    </div>
+
+    <div id="server-status" class="status disconnected">
+      🔌 Connecting to server...
+    </div>
+  </div>
+
+  <script type="module">
+    // Check server connection
+    import { io } from 'socket.io-client';
+
+    const socket = io('http://localhost:3001');
+    const statusEl = document.getElementById('server-status');
+
+    socket.on('connect', () => {
+      statusEl.className = 'status connected';
+      statusEl.innerHTML = '✅ Server connected - Ready to use!';
+    });
+
+    socket.on('disconnect', () => {
+      statusEl.className = 'status disconnected';
+      statusEl.innerHTML = '❌ Server disconnected - Please start the server';
+    });
+
+    socket.on('connect_error', () => {
+      statusEl.className = 'status disconnected';
+      statusEl.innerHTML = '❌ Server not running - Run: npm run server';
+    });
+  </script>
 </body>
 
 </html>
