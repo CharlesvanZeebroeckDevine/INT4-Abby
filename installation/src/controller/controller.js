@@ -110,7 +110,30 @@ class ControllerApp {
                 this.currentProfileIndex = (this.currentProfileIndex - 1 + this.profiles.length) % this.profiles.length
             }
             this.updateCarouselSelection()
-            this.debouncedEmitProfileSelected() // Debounced emit
+            this.debouncedEmitProfileSelected()
+        })
+
+        // Listen for arrow button (Enter key) to change artwork
+        this.socket.on('simulate-arrow', () => {
+            const currentProfile = this.profiles[this.currentProfileIndex]
+            if (!currentProfile || !currentProfile.artworks || currentProfile.artworks.length <= 1) return
+
+            // Get current artwork index from monitor's state
+            this.socket.emit('get-current-artwork', { profileIndex: this.currentProfileIndex })
+        })
+
+        // Listen for current artwork index from monitor
+        this.socket.on('current-artwork-index', (data) => {
+            const currentProfile = this.profiles[this.currentProfileIndex]
+            if (!currentProfile || !currentProfile.artworks) return
+
+            const nextArtworkIndex = (data.artworkIndex + 1) % currentProfile.artworks.length
+
+            // Emit new artwork selection to monitor
+            this.socket.emit('artwork-selected', {
+                profileIndex: this.currentProfileIndex,
+                artworkIndex: nextArtworkIndex
+            })
         })
 
         this.socket.on('carousel-update', (data) => {
@@ -120,12 +143,12 @@ class ControllerApp {
 
         this.socket.on('enter-voting', () => {
             this.isVoting = true
-            window.location.href = './vote.html' // Redirect to vote page
+            window.location.href = './vote.html'
         })
 
         this.socket.on('exit-voting', () => {
             this.isVoting = false
-            window.location.href = './controller.html' // Redirect back to controller
+            window.location.href = './controller.html'
         })
     }
 

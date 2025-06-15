@@ -141,10 +141,9 @@ function handleVoteButton() {
 function handleArrowButton() {
     if (currentState.isVoting) return; // Don't change artwork while voting
 
-    // This will be updated by the monitor when it knows how many artworks the current profile has
+    // Simply emit next-artwork event and let the monitor handle the navigation
     io.emit('next-artwork', {
-        profileIndex: currentState.selectedProfileIndex,
-        currentArtworkIndex: currentState.selectedArtworkIndex
+        profileIndex: currentState.selectedProfileIndex
     });
 }
 

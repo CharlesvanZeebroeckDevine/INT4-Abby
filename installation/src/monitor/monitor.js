@@ -55,6 +55,24 @@ class MonitorApp {
             }
         })
 
+        // Listen for next artwork request
+        this.socket.on('next-artwork', (data) => {
+            if (data.profileIndex === this.currentProfileIndex && this.currentProfile?.artworks?.length > 0) {
+                this.currentArtworkIndex = (this.currentArtworkIndex + 1) % this.currentProfile.artworks.length
+                this.renderCurrentArtwork()
+            }
+        })
+
+        // Listen for current artwork request
+        this.socket.on('get-current-artwork', (data) => {
+            if (data.profileIndex === this.currentProfileIndex) {
+                this.socket.emit('current-artwork-index', {
+                    profileIndex: this.currentProfileIndex,
+                    artworkIndex: this.currentArtworkIndex
+                })
+            }
+        })
+
         // Listen for vote confirmation
         this.socket.on('vote-confirmed', () => {
             this.showVoteConfirmation()
