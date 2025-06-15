@@ -43,7 +43,7 @@ class MonitorApp {
         // Listen for profile selection
         this.socket.on('profile-selected', (data) => {
             this.currentProfileIndex = data.profileIndex
-            this.currentArtworkIndex = data.artworkIndex
+            this.currentArtworkIndex = 0 // Reset artwork index when profile changes
             this.renderCurrentProfile()
         })
 
@@ -98,42 +98,76 @@ class MonitorApp {
         `
 
         // Handle process section visibility
-        const processSection = document.querySelector('.process-section')
-        if (processSection) {
-            if (this.currentArtwork.include_process && this.currentArtwork.process_description) {
-                // Show process section
-                processSection.style.display = 'grid'
+        const processElements = [
+            document.querySelector('.process'),
+            document.querySelector('.info-process'),
+            document.querySelector('.process-pic-main'),
+            document.querySelector('.process-pic-secondary'),
+            document.querySelector('.blue')
+        ]
 
-                // Update process description
-                const processInfo = processSection.querySelector('.info-process p')
-                if (processInfo) {
-                    processInfo.textContent = this.currentArtwork.process_description
+        if (this.currentArtwork.include_process) {
+            // Show process section
+            processElements.forEach(el => {
+                if (el) {
+                    if (el.classList.contains('process')) {
+                        el.style.display = 'flex'
+                    } else {
+                        el.style.display = 'block'
+                    }
                 }
+            })
 
-                // Update process images if available
-                const processPicMain = processSection.querySelector('.process-pic-main')
-                const processPicSecondary = processSection.querySelector('.process-pic-secondary')
+            // Update process description
+            const processInfo = document.querySelector('.info-process p')
+            if (processInfo) {
+                processInfo.textContent = this.currentArtwork.process_description
+            }
 
-                if (this.currentArtwork.process_images?.length > 0) {
+            // Update process images if available
+            const processPicMain = document.querySelector('.process-pic-main')
+            const processPicSecondary = document.querySelector('.process-pic-secondary')
+
+            if (this.currentArtwork.process_images?.length > 0) {
+                // Create temporary images to check dimensions
+                const tempImages = this.currentArtwork.process_images.map(url => {
+                    return new Promise((resolve) => {
+                        const img = new Image()
+                        img.onload = () => resolve({
+                            url,
+                            width: img.width,
+                            height: img.height,
+                            ratio: img.width / img.height
+                        })
+                        img.src = url
+                    })
+                })
+
+                Promise.all(tempImages).then(images => {
+                    // Sort images by aspect ratio (vertical vs horizontal)
+                    const sortedImages = images.sort((a, b) => b.ratio - a.ratio)
+
+                    // Vertical image (lower ratio) goes in main
                     if (processPicMain) {
                         processPicMain.innerHTML = `
-                            <img class="avatar-pic" src="${this.currentArtwork.process_images[0]}" alt="Process image" />
+                            <img class="process-pic" src="${sortedImages[1].url}" alt="Process image" />
                         `
                     }
 
+                    // Horizontal image (higher ratio) goes in secondary
                     if (this.currentArtwork.process_images.length > 1 && processPicSecondary) {
                         processPicSecondary.innerHTML = `
-                            <img class="avatar-pic" src="${this.currentArtwork.process_images[1]}" alt="Process image" />
+                            <img class="process-pic" src="${sortedImages[0].url}" alt="Process image" />
                         `
                     }
-                }
-            } else {
-                // Hide process section if include_process is false or no process description
-                processSection.style.display = 'none'
+                })
             }
+        } else {
+            // Hide process section
+            processElements.forEach(el => {
+                if (el) el.style.display = 'none'
+            })
         }
-
-        // Update dots navigation
     }
 
     showVoteConfirmation() {

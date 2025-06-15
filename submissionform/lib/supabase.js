@@ -21,7 +21,6 @@ function generateUUID() {
 }
 
 // Profile Management
-// Profile Management
 export const createProfile = async (profileData) => {
   try {
     const { data, error } = await supabase

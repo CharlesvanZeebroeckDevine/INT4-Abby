@@ -132,10 +132,8 @@ class ControllerApp {
     // New method to emit the currently selected profile to the monitor
     emitProfileSelected() {
         if (this.profiles.length === 0) return
-        const selectedProfile = this.profiles[this.currentProfileIndex]
         this.socket.emit('profile-selected', {
-            profileIndex: this.currentProfileIndex,
-            profileData: selectedProfile
+            profileIndex: this.currentProfileIndex
         })
         console.log('Controller: Emitted profile-selected', this.currentProfileIndex)
     }
@@ -187,45 +185,65 @@ class ControllerApp {
 
         if (this.profiles.length === 0) {
             console.log('No profiles to render in Controller. Profiles array is empty.')
-            carouselContainer.innerHTML = '<p>No avatars available.</p>' // Provide feedback
+            carouselContainer.innerHTML = '<p>No avatars available.</p>'
             return
         }
 
         console.log('Controller: Rendering avatars...', this.profiles.length)
         let avatarsHTML = ''
-        this.profiles.forEach((profile, index) => {
-            const isActive = index === this.currentProfileIndex ? 'active' : ''
+
+        // Only create elements for the 5 visible avatars
+        const visibleIndices = [
+            (this.currentProfileIndex - 2 + this.profiles.length) % this.profiles.length, // prevLeftSecond
+            (this.currentProfileIndex - 1 + this.profiles.length) % this.profiles.length, // prev
+            this.currentProfileIndex, // selected
+            (this.currentProfileIndex + 1) % this.profiles.length, // next
+            (this.currentProfileIndex + 2) % this.profiles.length  // nextRightSecond
+        ]
+
+        visibleIndices.forEach((index, position) => {
+            const profile = this.profiles[index]
+            let className = 'square'
+
+            switch (position) {
+                case 0:
+                    className += ' prevLeftSecond'
+                    break
+                case 1:
+                    className += ' prev'
+                    break
+                case 2:
+                    className += ' selected'
+                    break
+                case 3:
+                    className += ' next'
+                    break
+                case 4:
+                    className += ' nextRightSecond'
+                    break
+            }
+
             avatarsHTML += `
-                <div class="square ${isActive}" data-profile-index="${index}">
-                    <img src="${profile.avatar_url || '/placeholder-avatar.svg'}" alt="${profile.creator_name}">
+                <div class="${className}" data-profile-index="${index}">
+                    <img src="${profile.avatar_url || '/images/abby/eye.svg'}" alt="${profile.creator_name}">
                 </div>
             `
         })
+
         carouselContainer.innerHTML = avatarsHTML
 
-        // Update the name display for the first profile or currently selected one
-        const nameDisplay = document.querySelector('.name')
-        if (nameDisplay && this.profiles.length > 0) {
-            nameDisplay.textContent = this.profiles[this.currentProfileIndex].creator_name
-        } else if (nameDisplay) {
-            nameDisplay.textContent = '' // Clear if no profiles
-        }
-    }
-
-    updateCarouselSelection() {
-        // Update visual 'active' state for avatars
-        const items = document.querySelectorAll('.eye-row .square')
-        items.forEach((item, index) => {
-            item.classList.toggle('active', index === this.currentProfileIndex)
-        })
-
-        // Update current profile name display
+        // Update the name display
         const nameDisplay = document.querySelector('.name')
         if (nameDisplay && this.profiles[this.currentProfileIndex]) {
             nameDisplay.textContent = this.profiles[this.currentProfileIndex].creator_name
         } else if (nameDisplay) {
-            nameDisplay.textContent = '' // Clear if no profile is selected
+            nameDisplay.textContent = ''
         }
+    }
+
+    updateCarouselSelection() {
+        // Re-render the carousel with new positions
+        this.renderAvatarsInRow()
     }
 
     async showSeeAllView() {
@@ -279,11 +297,6 @@ class ControllerApp {
         <div class="profile-avatar">
           <img src="${profile.avatar_url || '/placeholder-avatar.svg'}"
                alt="${profile.creator_name}">
-        </div>
-        <div class="profile-info">
-          <h3>${profile.creator_name}</h3>
-          <p>${profile.description || ''}</p>
-          <div class="artwork-count">${profile.artworks?.length || 0} artworks</div>
         </div>
       </div>
     `).join('')

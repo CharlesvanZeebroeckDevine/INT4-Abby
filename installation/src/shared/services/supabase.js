@@ -41,11 +41,8 @@ export const fetchAllProfiles = async () => {
             return { data: [], error }
         }
 
-        // Shuffle profiles for random order
-        const shuffledProfiles = data.sort(() => Math.random() - 0.5)
-
-        console.log(`Loaded ${shuffledProfiles.length} profiles`)
-        return { data: shuffledProfiles, error: null }
+        console.log(`Loaded ${data.length} profiles`)
+        return { data, error: null }
 
     } catch (error) {
         console.error('Fetch profiles error:', error)

@@ -159,7 +159,7 @@ h2 {
   outline: none;
 }
 
-.see-all-btn {
+button {
   padding: 0.75em 1.5em;
   background-color: var(--green);
   color: black;
@@ -179,21 +179,14 @@ h2 {
 
 .name {
   font-size: 30px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-25%);
-  top: 55%;
 }
 
 .eye-row {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  margin: 0 auto;
-  gap: 75px;
+  height: 200px;
   overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .main {
@@ -203,23 +196,69 @@ h2 {
 }
 
 .square {
+  position: absolute;
   width: 125px;
   height: 125px;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
   text-align: center;
   font-size: 0.9rem;
   color: black;
   flex-direction: column;
+  transition: transform 0.5s, left 0.5s, opacity 0.5s, z-index 0s;
+  cursor: pointer;
 }
 
 .square img {
-  width: 75%;
-  height: 75%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.square.hideLeft {
+  left: 0%;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-50%) scale(0.5);
+  z-index: 1;
+}
+
+.square.hideRight {
+  left: 100%;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-50%) scale(0.5);
+  z-index: 1;
+}
+
+.square.prev {
+  z-index: 5;
+  left: 30%;
+  transform: translateY(0) translateX(-50%) scale(0.8);
+}
+
+.square.prevLeftSecond {
+  z-index: 4;
+  left: 15%;
+  transform: translateY(0) translateX(-50%) scale(0.6);
+}
+
+.square.selected {
+  z-index: 10;
+  left: 50%;
+  transform: translateY(0) translateX(-50%) scale(1.2);
+}
+
+.square.next {
+  z-index: 5;
+  left: 70%;
+  transform: translateY(0) translateX(-50%) scale(0.8);
+}
+
+.square.nextRightSecond {
+  z-index: 4;
+  left: 85%;
+  transform: translateY(0) translateX(-50%) scale(0.6);
 }
 
 .underline {
@@ -244,7 +283,7 @@ h2 {
   height: 60px;
 }
 
-.grid {
+.profiles-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
@@ -255,8 +294,8 @@ h2 {
   overflow-y: scroll;
 }
 
-.grid-item {
-  width: 100%;
+.profile-card img {
+  width: 271px;
   height: 271px;
   display: flex;
   align-items: center;
@@ -288,9 +327,4 @@ h2 {
 
 .category.see-all-btn {
   background-color: var(--green);
-}
-
-.selected {
-  background-color: var(--blue);
-  border: 2px dashed black;
 }
