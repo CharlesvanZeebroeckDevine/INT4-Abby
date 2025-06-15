@@ -5,13 +5,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Creative Page</title>
+    <title>ABBY Controller</title>
     <link rel="stylesheet" href="reset.css" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="arduino.css" />
     <script type="module" src="controller.js" defer></script>
 </head>
 
 <body>
+    <button id="connect" class="arduino-connect" style="display:none;">Connect to Arduino</button>
     <header>
         <div class="logo"></div>
         <img class="eye" src="/images/abby/eye.svg" alt="eye" />
@@ -35,7 +37,7 @@
             <div class="name">Name of selected artist update based on name of selected avatar</div>
             <div class="bottom-half">
                 <div class="eye-row">
-                    // put database avatars here//
+                    // database avatars here//
                 </div>
             </div>
         </div>

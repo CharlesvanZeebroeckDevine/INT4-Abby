@@ -2,7 +2,7 @@ console.log('Controller.js script started parsing.');
 
 import { io } from 'socket.io-client'
 import { fetchAllProfiles, fetchProfilesByCategory, fetchCategories, submitVote } from '../shared/services/supabase.js'
-import ArduinoSimulator from '../shared/arduino-simulator.js'
+import ArduinoController from '../shared/arduino-controller.js'
 
 // Debounce utility function
 const debounce = (func, delay) => {
@@ -23,7 +23,7 @@ class ControllerApp {
         this.isVoting = false
         this.currentView = 'carousel' // 'carousel' or 'seeall'
         this.selectedCategory = 'all'
-        this.arduinoSimulator = null
+        this.arduinoController = null
 
         // Debounced function for emitting profile selections
         this.debouncedEmitProfileSelected = debounce(this.emitProfileSelected, 150) // 150ms debounce
@@ -34,8 +34,8 @@ class ControllerApp {
 
     async init() {
         try {
-            // Initialize Arduino simulator
-            this.arduinoSimulator = new ArduinoSimulator(this.socket)
+            // Initialize Arduino controller
+            this.arduinoController = new ArduinoController(this.socket)
 
             // Load data from database
             console.log('Controller: Calling loadProfiles...')
