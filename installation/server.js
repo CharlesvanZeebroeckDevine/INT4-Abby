@@ -11,71 +11,12 @@ const io = new Server(httpServer, {
     }
 });
 
-// Arduino connection
-// let arduinoPort = null;
-// let isArduinoConnected = false;
-
-// Current state
 let currentState = {
     selectedProfileIndex: 0,
     selectedArtworkIndex: 0,
     isVoting: false,
     totalProfiles: 0
 };
-
-// Initialize Arduino connection
-// async function initializeArduino() {
-//     try {
-//         // List available ports to find Arduino
-//         const ports = await SerialPort.list();
-//         console.log('Available ports:', ports.map(p => p.path));
-
-//         // Try to connect to Arduino (adjust port as needed)
-//         const arduinoPortPath = ports.find(port =>
-//             port.manufacturer?.includes('Arduino') ||
-//             port.path.includes('tty.usbmodem') ||
-//             port.path.includes('COM')
-//         )?.path;
-
-//         if (arduinoPortPath) {
-//             console.log('Found Arduino at:', arduinoPortPath);
-//             arduinoPort = new SerialPort({
-//                 path: arduinoPortPath,
-//                 baudRate: 9600,
-//                 autoOpen: true
-//             });
-
-//             const parser = arduinoPort.pipe(new ReadlineParser({ delimiter: '\n' }));
-
-//             parser.on('data', (data) => {
-//                 console.log('Raw Arduino data:', data);
-//                 handleArduinoInput(data.trim());
-//             });
-
-//             arduinoPort.on('open', () => {
-//                 console.log('✅ Arduino connected on', arduinoPortPath);
-//                 isArduinoConnected = true;
-//                 io.emit('arduino-status', { connected: true });
-//             });
-
-//             arduinoPort.on('error', (err) => {
-//                 console.log('❌ Arduino connection error:', err.message);
-//                 isArduinoConnected = false;
-//                 io.emit('arduino-status', { connected: false });
-//             });
-
-//             arduinoPort.on('close', () => {
-//                 console.log('❌ Arduino disconnected');
-//                 isArduinoConnected = false;
-//                 io.emit('arduino-status', { connected: false });
-//             });
-//         } else {
-//             console.log('⚠️  No Arduino found. Using simulator mode.');
-//         }
-//     } catch (error) {
-//         console.log('⚠️  Arduino initialization failed:', error.message);
-//     }
-// }
 
 // Handle Arduino input
 function handleArduinoInput(data) {
@@ -230,7 +171,7 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-const PORT = 3001;
+const PORT = 3000;
 httpServer.listen(PORT, () => {
     console.log(`🚀 Socket.IO server running on port ${PORT}`);
     console.log(`📱 Controller: http://localhost:3000/src/controller.html`);

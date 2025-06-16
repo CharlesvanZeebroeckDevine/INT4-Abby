@@ -7,7 +7,7 @@ class SocketService {
         this.isConnected = false
     }
 
-    connect(serverUrl = `//${url.hostname}:3001`) {
+    connect(serverUrl = `//${url.hostname}:3000`) {
         this.socket = io(serverUrl)
 
         this.socket.on('connect', () => {
