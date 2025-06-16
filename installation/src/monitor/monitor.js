@@ -3,7 +3,8 @@ import { fetchAllProfiles } from '../shared/services/supabase.js'
 
 class MonitorApp {
     constructor() {
-        this.socket = io('http://localhost:3001')
+        const url = new URL(window.location);
+        this.socket = io(`//${url.hostname}:3001`)
         this.profiles = []
         this.currentProfileIndex = 0
         this.currentArtworkIndex = 0

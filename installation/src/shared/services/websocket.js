@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client'
+const url = new URL(window.location);
 
 class SocketService {
     constructor() {
@@ -6,7 +7,7 @@ class SocketService {
         this.isConnected = false
     }
 
-    connect(serverUrl = 'http://localhost:3001') {
+    connect(serverUrl = `//${url.hostname}:3001`) {
         this.socket = io(serverUrl)
 
         this.socket.on('connect', () => {
