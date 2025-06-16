@@ -11,6 +11,7 @@
     width: 300px;
     height: 300px;
     overflow: hidden;
+    border: 1px solid;
     cursor: move;
     user-select: none;
     touch-action: none;
@@ -39,7 +40,6 @@
 .eye-guide-svg {
     width: 70%;
     height: 70%;
-    opacity: 0.8;
 }
 
 .zoom-controls {
@@ -48,7 +48,6 @@
     gap: 1rem;
     padding: 0.5rem;
     background: rgba(0, 0, 0, 0.1);
-    border-radius: 2rem;
 }
 
 .zoom-button {

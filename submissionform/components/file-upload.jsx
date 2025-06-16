@@ -185,7 +185,7 @@ export const FileUpload = ({
         className="ui-file-upload-content"
         style={{ cursor: 'pointer' }}
       >
-        <p>Drag and drop files here, or click to select files</p>
+        <p>Tap to upload your creation</p>
         <p className="ui-file-upload-hint">Maximum {maxFiles} files</p>
       </label>
       {files.length > 0 && (

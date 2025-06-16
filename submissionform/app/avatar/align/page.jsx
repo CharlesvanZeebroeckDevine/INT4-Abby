@@ -22,7 +22,7 @@ export default function AlignPage() {
     const [panY, setPanY] = useState(state.avatar.panY || 0)
 
     const CONTAINER_SIZE = 300
-    const MIN_INITIAL_SCALE = 0.5 // Minimum allowed scale factor relative to its 'fit' size
+    const MIN_INITIAL_SCALE = 0.3 // Minimum allowed scale factor relative to its 'fit' size
     const MAX_SCALE = 5           // Maximum allowed scale factor (e.g., 5x the initial fit)
 
     // Effect to load image and calculate initial scale/pan on mount or when eyeImage changes
@@ -256,7 +256,7 @@ export default function AlignPage() {
                         <div>No image selected</div>
                     )}
                     <div className="guide-overlay">
-                        <img src="/Eye.svg" alt="Eye guide" className="eye-guide-svg" />
+                        <img src="/eyeGuide.svg" alt="Eye guide" className="eye-guide-svg" />
                     </div>
                 </div>
 

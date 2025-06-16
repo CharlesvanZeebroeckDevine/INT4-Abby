@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
 import { useForm } from "../../contexts/form-context"
-import { Layout } from "../../components/ui/layout"
+import { Layout } from "../../components/layout"
 
 export default function SuccessPage() {
   const { state } = useForm()

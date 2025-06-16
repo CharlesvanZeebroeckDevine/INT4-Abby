@@ -1,26 +1,10 @@
 .ui-file-upload {
-    border: 2px dashed #e5e7eb;
-    border-radius: 0.5rem;
+    border: 1px solid #000000;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    background-color: #f9fafb;
-}
-
-.ui-file-upload:hover {
-    border-color: var(--abby-green);
-    background-color: #f0fdf4;
-}
-
-.ui-file-upload-dragging {
-    border-color: var(--abby-green);
-    background-color: #f0fdf4;
-}
-
-.ui-file-upload-error {
-    border-color: #dc2626;
-    background-color: #fef2f2;
+    background-color: #F9F9F9;
 }
 
 .ui-file-input {
@@ -34,11 +18,11 @@
 }
 
 .ui-file-upload-content p {
-    margin: 0;
     color: #4b5563;
 }
 
 .ui-file-upload-hint {
     font-size: 0.875rem;
     color: #6b7280;
+    margin-bottom: 1rem;
 }

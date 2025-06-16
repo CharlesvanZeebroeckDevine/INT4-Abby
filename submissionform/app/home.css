@@ -1,0 +1,58 @@
+.abby-logo {
+    max-width: 60px;
+}
+
+.home-logos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.home-title {
+    line-height: normal;
+    font-size: 3rem;
+}
+
+.home-top {
+    padding: 2rem 1rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background-color: #5f90ff;
+}
+
+.homepage {
+    padding: 2rem 1rem 1rem 1rem;
+}
+
+.home-img {
+    margin: 1rem 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.home-img img {
+    max-width: 60vw;
+}
+
+button {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: black;
+    border: none;
+    font-weight: 400;
+}
+
+.home-buttons {
+    margin-top: 2rem;
+}
+
+.start-button {
+    background-color: #01a569;
+}
+
+.friend-button {
+    background-color: #ffbf50;
+}

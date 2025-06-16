@@ -236,7 +236,7 @@ export default function ArtworkPage() {
 
                 <div className="abby-field-group">
                   <label htmlFor={`category-${index}`} className="abby-field-label">
-                    Category
+                    Choose a category
                   </label>
                   <div className="abby-category-grid">
                     {categories.map((category) => (

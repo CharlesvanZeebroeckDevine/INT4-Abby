@@ -1,7 +1,5 @@
 "use client"
 
-import "./button.css"
-
 export const Button = ({
   children,
   onClick,

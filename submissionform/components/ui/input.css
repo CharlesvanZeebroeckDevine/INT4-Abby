@@ -10,6 +10,13 @@
     transition: border-color 0.2s ease;
 }
 
+input {
+    border-radius: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
 .ui-input:focus {
     outline: none;
     border-color: var(--abby-green);
