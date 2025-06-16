@@ -246,9 +246,14 @@ class ControllerApp {
                     break
             }
 
+            const colors = ['yellow', 'green', 'orange', 'blue', 'purple']
+            const randomColor = colors[Math.floor(Math.random() * colors.length)]
+            const hasAvatar = profile.avatar_url && profile.avatar_url !== '/images/abby/eye.svg'
+            const avatarClass = hasAvatar ? '' : `no-avatar bg-${randomColor}`
+
             avatarsHTML += `
-                <div class="${className}" data-profile-index="${index}">
-                    <img src="${profile.avatar_url || '/images/abby/eye.svg'}" alt="${profile.creator_name}">
+                <div class="${className} ${avatarClass}" data-profile-index="${index}">
+                    <img src="${profile.avatar_url || '/images/abby/eye.svg'}" alt="${profile.creator_name}" class="${!hasAvatar ? 'default-avatar' : ''}">
                 </div>
             `
         })

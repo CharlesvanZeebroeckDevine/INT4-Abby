@@ -11,9 +11,9 @@ const io = new Server(httpServer, {
     }
 });
 
-// Arduino connection (will be enabled tomorrow)
-let arduinoPort = null;
-let isArduinoConnected = false;
+// Arduino connection
+// let arduinoPort = null;
+// let isArduinoConnected = false;
 
 // Current state
 let currentState = {
@@ -23,50 +23,59 @@ let currentState = {
     totalProfiles: 0
 };
 
-// Initialize Arduino connection (for tomorrow)
-async function initializeArduino() {
-    try {
-        // List available ports to find Arduino
-        const ports = await SerialPort.list();
-        console.log('Available ports:', ports.map(p => p.path));
+// Initialize Arduino connection
+// async function initializeArduino() {
+//     try {
+//         // List available ports to find Arduino
+//         const ports = await SerialPort.list();
+//         console.log('Available ports:', ports.map(p => p.path));
 
-        // Try to connect to Arduino (adjust port as needed)
-        const arduinoPortPath = ports.find(port =>
-            port.manufacturer?.includes('Arduino') ||
-            port.path.includes('tty.usbmodem') ||
-            port.path.includes('COM')
-        )?.path;
+//         // Try to connect to Arduino (adjust port as needed)
+//         const arduinoPortPath = ports.find(port =>
+//             port.manufacturer?.includes('Arduino') ||
+//             port.path.includes('tty.usbmodem') ||
+//             port.path.includes('COM')
+//         )?.path;
 
-        if (arduinoPortPath) {
-            arduinoPort = new SerialPort({
-                path: arduinoPortPath,
-                baudRate: 9600
-            });
+//         if (arduinoPortPath) {
+//             console.log('Found Arduino at:', arduinoPortPath);
+//             arduinoPort = new SerialPort({
+//                 path: arduinoPortPath,
+//                 baudRate: 9600,
+//                 autoOpen: true
+//             });
 
-            const parser = arduinoPort.pipe(new ReadlineParser({ delimiter: '\n' }));
+//             const parser = arduinoPort.pipe(new ReadlineParser({ delimiter: '\n' }));
 
-            parser.on('data', (data) => {
-                handleArduinoInput(data.trim());
-            });
+//             parser.on('data', (data) => {
+//                 console.log('Raw Arduino data:', data);
+//                 handleArduinoInput(data.trim());
+//             });
 
-            arduinoPort.on('open', () => {
-                console.log('✅ Arduino connected on', arduinoPortPath);
-                isArduinoConnected = true;
-                io.emit('arduino-status', { connected: true });
-            });
+//             arduinoPort.on('open', () => {
+//                 console.log('✅ Arduino connected on', arduinoPortPath);
+//                 isArduinoConnected = true;
+//                 io.emit('arduino-status', { connected: true });
+//             });
 
-            arduinoPort.on('error', (err) => {
-                console.log('❌ Arduino connection error:', err.message);
-                isArduinoConnected = false;
-                io.emit('arduino-status', { connected: false });
-            });
-        } else {
-            console.log('⚠️  No Arduino found. Using simulator mode.');
-        }
-    } catch (error) {
-        console.log('⚠️  Arduino initialization failed:', error.message);
-    }
-}
+//             arduinoPort.on('error', (err) => {
+//                 console.log('❌ Arduino connection error:', err.message);
+//                 isArduinoConnected = false;
+//                 io.emit('arduino-status', { connected: false });
+//             });
+
+//             arduinoPort.on('close', () => {
+//                 console.log('❌ Arduino disconnected');
+//                 isArduinoConnected = false;
+//                 io.emit('arduino-status', { connected: false });
+//             });
+//         } else {
+//             console.log('⚠️  No Arduino found. Using simulator mode.');
+//         }
+//     } catch (error) {
+//         console.log('⚠️  Arduino initialization failed:', error.message);
+//     }
+// }
 
 // Handle Arduino input
 function handleArduinoInput(data) {
@@ -153,7 +162,7 @@ io.on('connection', (socket) => {
 
     // Send current state to new clients
     socket.emit('state-update', currentState);
-    socket.emit('arduino-status', { connected: isArduinoConnected });
+    socket.emit('arduino-status', { connected: false });
 
     // Handle profile count update from controller
     socket.on('profiles-loaded', (data) => {
@@ -198,21 +207,21 @@ io.on('connection', (socket) => {
 
     // Arduino simulator events (for testing)
     socket.on('simulate-knob', (direction) => {
-        if (!isArduinoConnected) {
-            handleKnobRotation(direction);
-        }
+        // if (!isArduinoConnected) {
+        handleKnobRotation(direction);
+        // }
     });
 
     socket.on('simulate-vote', () => {
-        if (!isArduinoConnected) {
-            handleVoteButton();
-        }
+        // if (!isArduinoConnected) {
+        handleVoteButton();
+        // }
     });
 
     socket.on('simulate-arrow', () => {
-        if (!isArduinoConnected) {
-            handleArrowButton();
-        }
+        // if (!isArduinoConnected) {
+        handleArrowButton();
+        // }
     });
 
     socket.on('disconnect', () => {
@@ -233,14 +242,14 @@ httpServer.listen(PORT, () => {
     console.log('   Enter: Arrow button');
 
     // Try to initialize Arduino (for tomorrow)
-    initializeArduino();
+    // initializeArduino();
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
     console.log('\n🛑 Shutting down server...');
-    if (arduinoPort && arduinoPort.isOpen) {
-        arduinoPort.close();
-    }
+    // if (arduinoPort && arduinoPort.isOpen) {
+    //     arduinoPort.close();
+    // }
     process.exit(0);
 });

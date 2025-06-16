@@ -3,7 +3,6 @@
   --green: #00a55f;
   --orange: #ff5c00;
   --blue: #5a90ff;
-  --blue-light: #81b9ff;
   --purple: #b37bd6;
 }
 
@@ -327,4 +326,38 @@ button {
 
 .category.see-all-btn {
   background-color: var(--green);
+}
+
+/* Background color classes */
+.bg-yellow {
+  background-color: var(--yellow);
+}
+
+.bg-green {
+  background-color: var(--green);
+}
+
+.bg-orange {
+  background-color: var(--orange);
+}
+
+.bg-blue {
+  background-color: var(--blue);
+}
+
+.bg-purple {
+  background-color: var(--purple);
+}
+
+/* Default avatar styles */
+.no-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.default-avatar {
+  width: 75% !important;
+  height: 75% !important;
+  object-fit: contain;
 }

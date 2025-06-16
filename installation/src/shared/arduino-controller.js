@@ -9,6 +9,7 @@ class ArduinoController {
         this.port = null
         this.reader = null
         this.connectBtn = document.getElementById('connect')
+        this.knobSteps = 0  // Add step counter
         this.init()
     }
 
@@ -23,9 +24,13 @@ class ArduinoController {
 
     async setupArduino() {
         try {
+            console.log('Setting up Arduino connection...')
             const ports = await navigator.serial.getPorts()
+            console.log('Available ports:', ports)
+
             if (ports.length > 0) {
                 this.port = ports[0]
+                console.log('Found existing port:', this.port)
                 await this.port.open({ baudRate: 9600 })
                 console.log('Connected to Arduino')
                 this.readSerial()
@@ -49,7 +54,9 @@ class ArduinoController {
         if (this.connectBtn) {
             this.connectBtn.addEventListener('click', async () => {
                 try {
+                    console.log('Requesting port access...')
                     this.port = await navigator.serial.requestPort()
+                    console.log('Port selected:', this.port)
                     await this.port.open({ baudRate: 9600 })
                     console.log('Connected to Arduino')
                     this.readSerial()
@@ -63,6 +70,7 @@ class ArduinoController {
 
     async readSerial() {
         try {
+            console.log('Setting up serial read...')
             const decoder = new TextDecoderStream()
             const inputDone = this.port.readable.pipeTo(decoder.writable)
             this.reader = decoder.readable.getReader()
@@ -78,6 +86,7 @@ class ArduinoController {
                         break
                     }
                     if (value) {
+                        console.log('Raw Arduino input:', value)
                         this.handleArduinoInput(value.trim())
                     }
                 } catch (readError) {
@@ -105,21 +114,33 @@ class ArduinoController {
     }
 
     handleArduinoInput(data) {
-        console.log('Arduino input:', data)
+        console.log('Processing Arduino input:', data)
 
         // Handle rotary encoder input
         if (data === '+1') {
-            this.socket.emit('simulate-knob', 'RIGHT')
+            this.knobSteps++
+            if (this.knobSteps >= 3) {
+                console.log('Emitting knob rotation: RIGHT')
+                this.socket.emit('simulate-knob', 'RIGHT')
+                this.knobSteps = 0  // Reset counter
+            }
         } else if (data === '-1') {
-            this.socket.emit('simulate-knob', 'LEFT')
+            this.knobSteps--
+            if (this.knobSteps <= -3) {
+                console.log('Emitting knob rotation: LEFT')
+                this.socket.emit('simulate-knob', 'LEFT')
+                this.knobSteps = 0  // Reset counter
+            }
         }
         // Handle button inputs
         else if (data === 'Blauwe knop ingedrukt!') {
+            console.log('Emitting vote button press')
             this.socket.emit('simulate-vote')
         } else if (data === 'Groene knop ingedrukt!') {
+            console.log('Emitting arrow button press')
             this.socket.emit('simulate-arrow')
         }
     }
 }
 
-export default ArduinoController 
+export default ArduinoController
