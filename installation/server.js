@@ -7,8 +7,17 @@ const httpServer = createServer();
 const io = new Server(httpServer, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"]
-    }
+        methods: ["GET", "POST"],
+        credentials: true,
+        allowedHeaders: ["*"]
+    },
+    transports: ['websocket', 'polling'],
+    allowEIO3: true
+});
+
+// Add connection logging
+io.engine.on("connection_error", (err) => {
+    console.log('Server: Connection error:', err);
 });
 
 let currentState = {
@@ -99,16 +108,37 @@ function handleArrowButton() {
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id);
+    console.log('Server: New client connected:', socket.id);
 
     // Send current state to new clients
     socket.emit('state-update', currentState);
     socket.emit('arduino-status', { connected: false });
 
+    // Handle profile selection from controller
+    socket.on('profile-selected', (data) => {
+        console.log('Server: Received profile selection:', {
+            socketId: socket.id,
+            data: data
+        });
+
+        currentState.selectedProfileIndex = data.profileIndex;
+        currentState.selectedArtworkIndex = 0; // Reset artwork index when changing profiles
+
+        // Broadcast to all clients
+        console.log('Server: Broadcasting profile selection to all clients');
+        io.emit('profile-selected', {
+            profileIndex: data.profileIndex,
+            profile: data.profile
+        });
+    });
+
     // Handle profile count update from controller
     socket.on('profiles-loaded', (data) => {
+        console.log('Server: Received profiles loaded:', {
+            socketId: socket.id,
+            count: data.count
+        });
         currentState.totalProfiles = data.count;
-        console.log(`Loaded ${data.count} profiles`);
     });
 
     // Handle artwork count update from monitor
@@ -166,16 +196,25 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('Client disconnected:', socket.id);
+        console.log('Server: Client disconnected:', socket.id);
+    });
+
+    socket.on('error', (error) => {
+        console.error('Server: Socket error:', {
+            socketId: socket.id,
+            error: error
+        });
     });
 });
 
 // Start server
 const PORT = 3000;
-httpServer.listen(PORT, () => {
-    console.log(`🚀 Socket.IO server running on port ${PORT}`);
-    console.log(`📱 Controller: http://localhost:3000/src/controller.html`);
-    console.log(`🖥️  Monitor: http://localhost:3000/src/monitor.html`);
+const HOST = '0.0.0.0'; // Listen on all network interfaces
+
+httpServer.listen(PORT, HOST, () => {
+    console.log(`🚀 Socket.IO server running on http://${HOST}:${PORT}`);
+    console.log(`📱 Controller: http://localhost:${PORT}/src/controller.html`);
+    console.log(`🖥️  Monitor: http://localhost:${PORT}/src/monitor.html`);
     console.log('');
     console.log('🎮 Arduino Simulator Controls:');
     console.log('   ← → Arrow Keys: Rotate knob');

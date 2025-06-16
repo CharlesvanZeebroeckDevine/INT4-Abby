@@ -7,8 +7,13 @@ class SocketService {
         this.isConnected = false
     }
 
-    connect(serverUrl = `//${url.hostname}:3000`) {
-        this.socket = io(serverUrl)
+    connect(serverUrl = `${window.location.protocol}//${url.hostname}:3000`) {
+        this.socket = io(serverUrl, {
+            transports: ['websocket'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        })
 
         this.socket.on('connect', () => {
             console.log('Connected to Socket.IO server')
@@ -24,9 +29,12 @@ class SocketService {
     }
 
     // Controller events
-    selectProfile(profileId, profileData) {
+    selectProfile(profileIndex, profile) {
         if (this.socket) {
-            this.socket.emit('profile-selected', { profileId, profileData })
+            this.socket.emit('profile-selected', {
+                profileIndex,
+                profile
+            })
         }
     }
 
@@ -58,6 +66,12 @@ class SocketService {
     onVoteSubmitted(callback) {
         if (this.socket) {
             this.socket.on('vote-submitted', callback)
+        }
+    }
+
+    onStateUpdate(callback) {
+        if (this.socket) {
+            this.socket.on('state-update', callback)
         }
     }
 
