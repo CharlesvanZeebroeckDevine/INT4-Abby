@@ -133,7 +133,9 @@
     // Check server connection
     import { io } from 'socket.io-client';
 
-    const socket = io('http://localhost:3001');
+    const url = new URL(window.location);
+    const socket = io(`http://${url.hostname}:3001`);
+
     const statusEl = document.getElementById('server-status');
 
     socket.on('connect', () => {

@@ -51,8 +51,14 @@ class ControllerApp {
             this.setupUIListeners()
 
             // Initial render
-            this.renderAvatarsInRow() // Render avatars in row after profiles are loaded
-            this.updateCarouselSelection() // Initial selection update
+            if (window.location.pathname.includes('gridview.html')) {
+                // If we're on the grid view page, render all profiles
+                this.renderSeeAllGrid(this.profiles)
+            } else {
+                // Otherwise render carousel view
+                this.renderAvatarsInRow()
+                this.updateCarouselSelection()
+            }
         } catch (error) {
             console.error('Controller Initialization error:', error)
         }
@@ -299,35 +305,51 @@ class ControllerApp {
     async filterByCategory(category) {
         this.selectedCategory = category
 
+        // Update active state of category buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.category === category)
         })
 
+        // Load and display filtered profiles
         await this.loadProfilesByCategory(category)
     }
 
     async loadProfilesByCategory(category) {
-        const { data, error } = await fetchProfilesByCategory(category === 'all' ? null : category)
-        if (error) {
-            console.error('Failed to load profiles by category:', error)
-            return
+        let filteredProfiles = this.profiles
+
+        if (category && category !== 'all') {
+            // Filter profiles that have at least one artwork in the selected category
+            filteredProfiles = this.profiles.filter(profile =>
+                profile.artworks && profile.artworks.some(artwork => artwork.category === category)
+            )
         }
 
-        this.renderSeeAllGrid(data)
+        // Render the filtered profiles
+        this.renderSeeAllGrid(filteredProfiles)
     }
 
     renderSeeAllGrid(profiles) {
         const grid = document.querySelector('.profiles-grid')
         if (!grid) return
 
-        grid.innerHTML = profiles.map(profile => `
-      <div class="profile-card" data-profile-id="${profile.id}">
-        <div class="profile-avatar">
-          <img src="${profile.avatar_url || '/placeholder-avatar.svg'}"
-               alt="${profile.creator_name}">
-        </div>
-      </div>
-    `).join('')
+        const colors = ['yellow', 'green', 'orange', 'blue', 'purple']
+
+        grid.innerHTML = profiles.map(profile => {
+            const hasAvatar = profile.avatar_url && profile.avatar_url !== '/images/abby/eye.svg'
+            const randomColor = colors[Math.floor(Math.random() * colors.length)]
+            const avatarClass = hasAvatar ? '' : `no-avatar bg-${randomColor}`
+
+            return `
+                <div class="profile-card" data-profile-id="${profile.id}">
+                    <div class="profile-avatar ${avatarClass}">
+                        <img src="${profile.avatar_url || '/images/abby/eye.svg'}"
+                             alt="${profile.creator_name}"
+                             class="${!hasAvatar ? 'default-avatar' : ''}">
+                    </div>
+                    <div class="artist-name">${profile.creator_name}</div>
+                </div>
+            `
+        }).join('')
     }
 
     showVotingInterface() {
