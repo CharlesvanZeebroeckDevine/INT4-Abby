@@ -140,7 +140,7 @@ class MonitorApp {
             // Update process description
             const processInfo = document.querySelector('.info-process p')
             if (processInfo) {
-                processInfo.textContent = this.currentArtwork.process_description
+                processInfo.textContent = this.currentArtwork.process_description || ''
             }
 
             // Update process images if available
@@ -162,24 +162,39 @@ class MonitorApp {
                     })
                 })
 
-                Promise.all(tempImages).then(images => {
-                    // Sort images by aspect ratio (vertical vs horizontal)
-                    const sortedImages = images.sort((a, b) => b.ratio - a.ratio)
+                Promise.all(tempImages)
+                    .then(images => {
+                        // Sort images by aspect ratio (vertical vs horizontal)
+                        const sortedImages = images.sort((a, b) => b.ratio - a.ratio)
 
-                    // Vertical image (lower ratio) goes in main
-                    if (processPicMain) {
-                        processPicMain.innerHTML = `
-                            <img class="process-pic" src="${sortedImages[1].url}" alt="Process image" />
-                        `
-                    }
+                        // Vertical image (lower ratio) goes in main
+                        if (processPicMain && sortedImages[1]?.url) {
+                            processPicMain.innerHTML = `
+                                <img class="process-pic" src="${sortedImages[1].url}" alt="Process image" />
+                            `
+                        } else if (processPicMain) {
+                            processPicMain.innerHTML = ''
+                        }
 
-                    // Horizontal image (higher ratio) goes in secondary
-                    if (this.currentArtwork.process_images.length > 1 && processPicSecondary) {
-                        processPicSecondary.innerHTML = `
-                            <img class="process-pic" src="${sortedImages[0].url}" alt="Process image" />
-                        `
-                    }
-                })
+                        // Horizontal image (higher ratio) goes in secondary
+                        if (processPicSecondary && sortedImages[0]?.url) {
+                            processPicSecondary.innerHTML = `
+                                <img class="process-pic" src="${sortedImages[0].url}" alt="Process image" />
+                            `
+                        } else if (processPicSecondary) {
+                            processPicSecondary.innerHTML = ''
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('Error loading process images:', error)
+                        // Clear process images on error
+                        if (processPicMain) processPicMain.innerHTML = ''
+                        if (processPicSecondary) processPicSecondary.innerHTML = ''
+                    })
+            } else {
+                // Clear process images if none available
+                if (processPicMain) processPicMain.innerHTML = ''
+                if (processPicSecondary) processPicSecondary.innerHTML = ''
             }
         } else {
             // Hide process section

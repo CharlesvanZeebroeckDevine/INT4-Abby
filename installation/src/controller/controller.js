@@ -17,7 +17,22 @@ const debounce = (func, delay) => {
 class ControllerApp {
     constructor() {
         const url = new URL(window.location);
-        this.socket = io(`//${url.hostname}:3000`)
+        console.log('Controller: Initializing with URL:', url.hostname);
+
+        // Construct the WebSocket URL
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${window.location.protocol}//${url.hostname}:3000`;
+
+        console.log('Controller: Connecting to WebSocket server at:', wsUrl);
+
+        this.socket = io(wsUrl, {
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            forceNew: true
+        });
+
         this.profiles = []
         this.categories = []
         this.currentProfileIndex = 0
@@ -104,7 +119,21 @@ class ControllerApp {
 
     setupSocketListeners() {
         this.socket.on('connect', () => {
-            console.log('Controller: Connected to server')
+            console.log('Controller: Connected to server with ID:', this.socket.id)
+            // Emit initial profile selection when connected
+            this.emitProfileSelected()
+        })
+
+        this.socket.on('connect_error', (error) => {
+            console.error('Controller: Connection error:', error)
+        })
+
+        this.socket.on('disconnect', (reason) => {
+            console.log('Controller: Disconnected from server. Reason:', reason)
+        })
+
+        this.socket.on('error', (error) => {
+            console.error('Controller: Socket error:', error)
         })
 
         // Listen for knob updates from the server
@@ -117,7 +146,7 @@ class ControllerApp {
                 this.currentProfileIndex = (this.currentProfileIndex - 1 + this.profiles.length) % this.profiles.length
             }
             this.updateCarouselSelection()
-            this.debouncedEmitProfileSelected()
+            this.emitProfileSelected()
         })
 
         // Listen for arrow button (Enter key) to change artwork
@@ -161,11 +190,22 @@ class ControllerApp {
 
     // New method to emit the currently selected profile to the monitor
     emitProfileSelected() {
-        if (this.profiles.length === 0) return
-        this.socket.emit('profile-selected', {
-            profileIndex: this.currentProfileIndex
+        if (this.profiles.length === 0) {
+            console.log('Controller: No profiles available to emit')
+            return
+        }
+        const selectedProfile = this.profiles[this.currentProfileIndex]
+        console.log('Controller: Emitting profile selection:', {
+            index: this.currentProfileIndex,
+            profile: selectedProfile,
+            socketId: this.socket.id,
+            socketConnected: this.socket.connected
         })
-        console.log('Controller: Emitted profile-selected', this.currentProfileIndex)
+
+        this.socket.emit('profile-selected', {
+            profileIndex: this.currentProfileIndex,
+            profile: selectedProfile
+        })
     }
 
     setupUIListeners() {
@@ -175,6 +215,22 @@ class ControllerApp {
             seeAllBtn.addEventListener('click', () => {
                 window.location.href = './gridview.html' // Redirect to grid view page
             })
+        }
+
+        // Add touch swipe functionality
+        const carouselContainer = document.querySelector('.eye-row')
+        if (carouselContainer) {
+            let touchStartX = 0
+            let touchEndX = 0
+
+            carouselContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX
+            }, { passive: true })
+
+            carouselContainer.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX
+                this.handleSwipe(touchStartX, touchEndX)
+            }, { passive: true })
         }
 
         // Back to carousel button (for gridview.html and vote.html)
@@ -204,6 +260,29 @@ class ControllerApp {
                 this.handleVoteSubmission()
             })
         }
+    }
+
+    handleSwipe(startX, endX) {
+        const swipeThreshold = 50 // Minimum distance for a swipe
+        const swipeDistance = endX - startX
+
+        if (Math.abs(swipeDistance) < swipeThreshold) return
+
+        console.log('Controller: Handling swipe, current index:', this.currentProfileIndex)
+
+        if (swipeDistance > 0) {
+            // Swipe right - go to previous profile
+            this.currentProfileIndex = (this.currentProfileIndex - 1 + this.profiles.length) % this.profiles.length
+        } else {
+            // Swipe left - go to next profile
+            this.currentProfileIndex = (this.currentProfileIndex + 1) % this.profiles.length
+        }
+
+        console.log('Controller: New profile index after swipe:', this.currentProfileIndex)
+
+        this.updateCarouselSelection()
+        // Call emitProfileSelected directly instead of using debounced version for immediate feedback
+        this.emitProfileSelected()
     }
 
     renderAvatarsInRow() {
