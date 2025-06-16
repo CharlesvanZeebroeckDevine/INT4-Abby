@@ -17,7 +17,7 @@ const debounce = (func, delay) => {
 class ControllerApp {
     constructor() {
         const url = new URL(window.location);
-        this.socket = io(`//${url.hostname}:3001`)
+        this.socket = io(`//${url.hostname}:3000`)
         this.profiles = []
         this.categories = []
         this.currentProfileIndex = 0
