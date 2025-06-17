@@ -8,7 +8,6 @@
     <title>ABBY Controller</title>
     <link rel="stylesheet" href="reset.css" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="arduino.css" />
     <script type="module" src="controller.js" defer></script>
 </head>
 
@@ -26,8 +25,10 @@
     <main>
         <div id="main-page">
             <div class="top-half">
-                <span></span>
-                <h2>VOTE FOR YOUR FAVORITE CREATIVE</h2>
+                <div class="controller-buttons">
+                    <button class="vote-btn">VOTE FOR THIS CREATIVE</button>
+                    <button id="next-artwork-btn" class="next-artwork-btn" style="display: none;">NEXT ARTWORK</button>
+                </div>
                 <div class="search-section">
                     <input type="text" placeholder="SEARCH" class="search-input" />
                     <button class="see-all-btn">SEE ALL</button>

@@ -53,6 +53,22 @@ io.on('connection', (socket) => {
         });
     });
 
+    // Handle artwork selection from controller
+    socket.on('artwork-selected', (data) => {
+        console.log('Server: Artwork selected:', {
+            profileIndex: data.profileIndex,
+            artworkIndex: data.artworkIndex
+        });
+
+        currentState.selectedArtworkIndex = data.artworkIndex;
+
+        // Broadcast to all clients
+        io.emit('artwork-selected', {
+            profileIndex: data.profileIndex,
+            artworkIndex: data.artworkIndex
+        });
+    });
+
     // Handle profile count update from controller
     socket.on('profiles-loaded', (data) => {
         currentState.totalProfiles = data.count;

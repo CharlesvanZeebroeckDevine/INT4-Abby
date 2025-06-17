@@ -137,8 +137,7 @@ export const submitVote = async (profileId, voterEmail, receiveUpdates = false) 
             .from('votes')
             .insert([{
                 profile_id: profileId,
-                voter_email: voterEmail,
-                receive_updates: receiveUpdates // Note: You might need to add this column to your votes table
+                voter_email: voterEmail
             }])
             .select()
             .single()
