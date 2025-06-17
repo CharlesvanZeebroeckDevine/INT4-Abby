@@ -20,6 +20,7 @@ export default function AlignPage() {
     const [scale, setScale] = useState(state.avatar.scale || 1)
     const [panX, setPanX] = useState(state.avatar.panX || 0)
     const [panY, setPanY] = useState(state.avatar.panY || 0)
+    const [imageUrl, setImageUrl] = useState(null)
 
     const CONTAINER_SIZE = 300
     const MIN_INITIAL_SCALE = 0.3 // Minimum allowed scale factor relative to its 'fit' size
@@ -28,8 +29,10 @@ export default function AlignPage() {
     // Effect to load image and calculate initial scale/pan on mount or when eyeImage changes
     useEffect(() => {
         if (state.avatar.eyeImage) {
+            const url = URL.createObjectURL(state.avatar.eyeImage)
+            setImageUrl(url)
             const img = new Image()
-            img.src = URL.createObjectURL(state.avatar.eyeImage)
+            img.src = url
             img.onload = () => {
                 loadedImageRef.current = img
 
@@ -48,11 +51,16 @@ export default function AlignPage() {
                 console.error("Failed to load image for alignment.")
                 loadedImageRef.current = null
             }
+
+            return () => {
+                URL.revokeObjectURL(url)
+            }
         } else {
             loadedImageRef.current = null
             setScale(1)
             setPanX(0)
             setPanY(0)
+            setImageUrl(null)
         }
     }, [state.avatar.eyeImage, MIN_INITIAL_SCALE])
 
@@ -185,7 +193,7 @@ export default function AlignPage() {
             container.addEventListener('touchstart', handleStart, { passive: false })
             container.addEventListener('touchmove', handleMove, { passive: false })
             container.addEventListener('touchend', handleEnd)
-            container.addEventListener('wheel', handleWheel, { passive: false })
+            container.addEventListener('wheel', handleWheel)
 
             return () => {
                 console.log("Removing event listeners.")
@@ -247,7 +255,7 @@ export default function AlignPage() {
                     {state.avatar.eyeImage ? (
                         <img
                             ref={imageRef}
-                            src={loadedImageRef.current ? loadedImageRef.current.src : ""} // Use loadedImageRef.current.src
+                            src={imageUrl}
                             alt="Eye avatar"
                             className="preview-image"
                             style={{ transform: `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${scale})` }}

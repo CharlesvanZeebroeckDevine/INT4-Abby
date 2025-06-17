@@ -23,6 +23,7 @@ class MonitorApp {
         this.currentArtworkIndex = 0
         this.currentProfile = null
         this.currentArtwork = null
+        this.profileColors = new Map() // Store profile colors
 
         this.init()
     }
@@ -46,6 +47,18 @@ class MonitorApp {
         }
 
         this.profiles = data
+
+        // Assign colors to profiles without avatars
+        const colors = ['yellow', 'green', 'orange', 'blue', 'purple']
+        this.profiles.forEach((profile, index) => {
+            const hasAvatar = profile.avatar_url && profile.avatar_url !== '/images/abby/eye.svg'
+            if (!hasAvatar) {
+                // Use the profile index to consistently assign colors
+                const colorIndex = index % colors.length
+                this.profileColors.set(profile.id, colors[colorIndex])
+            }
+        })
+
         console.log(`Loaded ${this.profiles.length} profiles`)
     }
 
@@ -119,7 +132,22 @@ class MonitorApp {
         if (!this.currentProfile) return
 
         // Update profile information
-        document.querySelector('.avatar-pic').src = this.currentProfile.avatar_url || './images/eyes/test.png'
+        const avatarPic = document.querySelector('.avatar-pic')
+        const hasAvatar = this.currentProfile.avatar_url && this.currentProfile.avatar_url !== '/images/abby/eye.svg'
+
+        if (hasAvatar) {
+            avatarPic.src = this.currentProfile.avatar_url
+            avatarPic.parentElement.classList.remove('no-avatar')
+            avatarPic.parentElement.classList.remove('bg-yellow', 'bg-green', 'bg-orange', 'bg-blue', 'bg-purple')
+        } else {
+            avatarPic.src = '/images/abby/eye.svg'
+            avatarPic.parentElement.classList.add('no-avatar')
+            const color = this.profileColors.get(this.currentProfile.id)
+            if (color) {
+                avatarPic.parentElement.classList.add(`bg-${color}`)
+            }
+        }
+
         document.querySelector('.nickname').textContent = this.currentProfile.creator_name
         document.querySelector('.pers-info p').textContent = this.currentProfile.description || ''
 
@@ -206,14 +234,14 @@ class MonitorApp {
                             // Vertical image (lower ratio) goes in main
                             if (processPicMain && sortedImages[0]) {
                                 processPicMain.innerHTML = `
-                                    <img class="process-pic" src="${sortedImages[0].url}" alt="Process image" />
+                                    <img class="process-pic" src="${sortedImages[1].url}" alt="Process image" />
                                 `
                             }
 
                             // Horizontal image (higher ratio) goes in secondary
                             if (processPicSecondary && sortedImages.length > 1 && sortedImages[1]) {
                                 processPicSecondary.innerHTML = `
-                                    <img class="process-pic" src="${sortedImages[1].url}" alt="Process image" />
+                                    <img class="process-pic" src="${sortedImages[0].url}" alt="Process image" />
                                 `
                             }
                         }

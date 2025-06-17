@@ -30,16 +30,16 @@
             </button>
             <div class="voting-content">
                 <div class="voting-profile-info">
-                    <p>Enter your email to vote for <span class="artist-name"></span></p>
+                    <p class="enter-email-desc">Enter your email to vote for <span class="artist-name"></span></p>
                 </div>
                 <form id="vote-form">
-                    <label for="voter-email">Your Email:</label>
-                    <input type="email" id="voter-email" name="email" required>
-                    <label>
-                        <input type="checkbox" name="receive_updates">
-                        Receive updates
-                    </label>
-                    <button type="submit">Submit Vote</button>
+                    <input class="email-field" type="email" id="voter-email" name="email"
+                        placeholder="Your email adress" required>
+                    <div class="updates-input">
+                        <input class="checkbox-email" type="checkbox" name="receive_updates">
+                        Check to receive updates if this artist gets invited to Abby Open House
+                    </div>
+                    <button class="vote-submit-button" type="submit">Submit Vote</button>
                 </form>
             </div>
         </div>

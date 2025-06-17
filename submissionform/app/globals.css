@@ -143,6 +143,7 @@ body {
   color: var(--color-black);
   cursor: pointer;
   display: flex;
+  align-items: center;
   gap: var(--spacing-xs);
   font-size: var(--font-size-base);
   transition: color 0.2s ease;
@@ -1045,15 +1046,11 @@ body {
 
 .abby-remove-file-button {
   color: var(--color-red);
-  background: none;
-  border: none;
   cursor: pointer;
   padding: var(--spacing-sm);
-  border-radius: var(--border-radius);
-}
-
-.abby-remove-file-button:hover {
-  background-color: #fef2f2;
+  border: 0;
+  border-radius: 0;
+  background-color: white;
 }
 
 /* Category selection boxes */
@@ -1069,7 +1066,8 @@ body {
   background-color: white;
   padding: 1rem;
   text-align: center;
-  border-width: 1px;
+  border: 1px solid black;
+  color: black;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -1106,14 +1104,12 @@ body {
 
 .abby-remove-button {
   color: var(--color-red);
-  background: none;
   border: none;
+  border-radius: 0;
+  background-color: white;
   cursor: pointer;
 }
 
-.abby-remove-button:hover {
-  background-color: #fef2f2;
-}
 
 .abby-artwork-fields {
   display: flex;
@@ -1168,15 +1164,15 @@ body {
 }
 
 .abby-submission-preview {
-  background-color: var(--color-gray-100);
   padding: var(--spacing-xl);
-  border-radius: var(--border-radius);
+  background-color: var(--color-accent);
+  border: 1px solid black;
   margin-bottom: var(--spacing-2xl);
 }
 
 .abby-creator-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
 }
@@ -1206,7 +1202,7 @@ body {
 .abby-artworks-preview {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
 }
 
 .abby-artworks-title {
@@ -1215,8 +1211,7 @@ body {
 }
 
 .abby-artwork-preview {
-  border: var(--border-width) solid var(--color-gray-200);
-  border-radius: var(--border-radius);
+  border: 1px solid black;
   padding: var(--spacing-lg);
   background-color: var(--color-white);
 }
@@ -1261,38 +1256,46 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-2xl);
-}
-
-.abby-next-steps {
-  background-color: var(--color-gray-100);
-  padding: var(--spacing-xl);
-  border-radius: var(--border-radius);
+  margin-top: 1rem;
 }
 
 .abby-next-steps-title {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: bold;
-  text-align: center;
-  margin-bottom: var(--spacing-xl);
+  text-align: left;
+  margin-bottom: var(--spacing-md);
 }
 
 .abby-steps-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-md);
 }
 
 .abby-step {
   display: flex;
+  padding: 1rem 2rem;
   align-items: flex-start;
   gap: var(--spacing-lg);
+  border: 1px solid black;
 }
+
+.step-1 {
+  background-color: var(--color-secondary);
+}
+
+.step-2 {
+  background-color: var(--color-accent);
+}
+
+.step-3 {
+  background-color: var(--color-primary);
+}
+
 
 .abby-step-number {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1302,17 +1305,15 @@ body {
 }
 
 .abby-step-yellow {
-  background-color: #fbbf24;
+  background-color: var(--color-secondary);
 }
 
 .abby-step-blue {
-  background-color: #3b82f6;
-  color: var(--color-white);
+  background-color: var(--color-purple);
 }
 
 .abby-step-purple {
-  background-color: #8b5cf6;
-  color: var(--color-white);
+  background-color: var(--color-accent);
 }
 
 .abby-step-content {
@@ -1326,7 +1327,11 @@ body {
 
 .abby-step-description {
   font-size: var(--font-size-sm);
-  color: var(--color-gray-600);
+}
+
+.submission-recap-title {
+  font-size: 1.3rem;
+  margin: 2rem 0 1rem 0;
 }
 
 /* Connection Status */
@@ -1449,4 +1454,110 @@ body {
 .ui-button.modal-button {
   width: 100%;
   margin-top: 1rem;
+}
+
+.ipad-container p {
+  margin-bottom: 1rem;
+}
+
+
+.share-popup {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out forwards;
+  z-index: 10;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0%);
+  }
+}
+
+.share-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  height: 50px;
+}
+
+.share-popup-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-button {
+  font-size: 30px;
+  background: none;
+  border: none;
+  color: #666;
+  width: 50px;
+  height: 50px;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
+.share-icons {
+  display: flex;
+  justify-content: left;
+  gap: 10px;
+}
+
+.icon-placeholder {
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  border-radius: 20%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.facebook {
+  background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Facebook_logo_%28square%29.png/500px-Facebook_logo_%28square%29.png);
+}
+
+.instagram {
+  background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/250px-Instagram_logo_2022.svg.png);
+}
+
+.whatsapp {
+  background-image: url(https://store-images.s-microsoft.com/image/apps.8453.13655054093851568.4a371b72-2ce8-4bdb-9d83-be49894d3fa0.7f3687b9-847d-4f86-bb5c-c73259e2b38e?h=210);
+}
+
+.imessage {
+  background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/2048px-IMessage_logo.svg.png);
+}
+
+.more {
+  background-image: url(https://media.istockphoto.com/id/1396048367/vector/triple-dots-icon-vector-three-dots-as-a-symbol-of-menu-interface-or-more-options-3-ellipses.jpg?s=612x612&w=0&k=20&c=wCh-lsZlTRtE_AgnmqSmYRARZKfawhtObulGRV_FRd0=);
+}
+
+.friend-button {
+  background-color: #ffbf50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  width: 100%;
+  height: 60px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: black;
+  border: none;
+  font-weight: 800;
 }

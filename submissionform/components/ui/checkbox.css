@@ -8,15 +8,14 @@
 .ui-checkbox {
     width: 1.5rem;
     height: 1.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.25rem;
+    border: 1px solid black;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .ui-checkbox:checked {
-    background-color: var(--abby-green);
-    border-color: var(--abby-green);
+    background-color: var(--color-primary);
+    border-color: black;
 }
 
 .ui-checkbox:disabled {
