@@ -32,6 +32,7 @@ class ControllerApp {
 
         this.profiles = []
         this.categories = []
+        this.profileColors = new Map() // Store profile colors
         // Get the stored profile index or default to 0
         this.currentProfileIndex = parseInt(sessionStorage.getItem('selectedProfileIndex')) || 0
         this.currentArtworkIndex = 0
@@ -87,6 +88,17 @@ class ControllerApp {
         }
 
         this.profiles = data
+
+        // Assign colors to profiles without avatars
+        const colors = ['yellow', 'green', 'orange', 'blue', 'purple']
+        this.profiles.forEach((profile, index) => {
+            const hasAvatar = profile.avatar_url && profile.avatar_url !== '/images/abby/eye.svg'
+            if (!hasAvatar) {
+                // Use the profile index to consistently assign colors
+                const colorIndex = index % colors.length
+                this.profileColors.set(profile.id, colors[colorIndex])
+            }
+        })
 
         // Notify server about profile count
         this.socket.emit('profiles-loaded', { count: this.profiles.length })
@@ -346,10 +358,8 @@ class ControllerApp {
                     break
             }
 
-            const colors = ['yellow', 'green', 'orange', 'blue', 'purple']
-            const randomColor = colors[Math.floor(Math.random() * colors.length)]
             const hasAvatar = profile.avatar_url && profile.avatar_url !== '/images/abby/eye.svg'
-            const avatarClass = hasAvatar ? '' : `no-avatar bg-${randomColor}`
+            const avatarClass = hasAvatar ? '' : `no-avatar bg-${this.profileColors.get(profile.id)}`
 
             avatarsHTML += `
                 <div class="${className} ${avatarClass}" data-profile-index="${index}">
@@ -465,7 +475,7 @@ class ControllerApp {
                              alt="${profile.creator_name}"
                              class="${!hasAvatar ? 'default-avatar' : ''}">
                     </div>
-                    <div class="artist-name">${profile.creator_name}</div>
+                    <div class="artist-name-grid">${profile.creator_name}</div>
                 </div>
             `
         }).join('')

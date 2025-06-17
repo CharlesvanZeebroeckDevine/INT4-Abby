@@ -35,24 +35,42 @@
     max-width: 60vw;
 }
 
-button {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    color: black;
-    border: none;
-    font-weight: 400;
-}
-
 .home-buttons {
     margin-top: 2rem;
 }
 
 .start-button {
     background-color: #01a569;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    height: 60px;
+    margin-bottom: 1rem;
+    color: black;
+    border: none;
+    font-weight: 800;
 }
 
 .friend-button {
     background-color: #ffbf50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    width: 100%;
+    height: 60px;
+    padding: 1rem;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: black;
+    border: none;
+    font-weight: 800;
+}
+
+.open-house-link {
+    color: #5f90ff;
 }

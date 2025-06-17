@@ -2,15 +2,28 @@
 
 import { Button } from "../components/ui/button"
 import Link from "next/link"
+import { useState } from "react"
 import { useForm } from "../contexts/form-context"
 import "./home.css"
 
-
 export default function LandingPage() {
   const { dispatch } = useForm()
+  const [showSharePopup, setShowSharePopup] = useState(false);
 
   const handleStartSubmission = () => {
     dispatch({ type: "RESET_FORM" })
+  }
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: 'Share Abby Open House',
+        text: 'Share your vision at Abby Open House!',
+        url: window.location.href
+      });
+    } catch (error) {
+      console.log('Error sharing:', error);
+    }
   }
 
   return (
@@ -29,20 +42,45 @@ export default function LandingPage() {
         <h1 className="home-title">SHARE YOUR <br /> VISION</h1>
       </div>
       <div className="homepage">
-        <p >See that screen in the Open House? That’s our live, interactive gallery.
-          It’s a space dedicated to showcasing what our community is passionate about,
+        <p >See that screen in the <Link className="open-house-link" href="https://www.abbykortrijk.be/en/take-part/open-house" target="_blank" rel="noopener noreferrer">Open House</Link>? That's our live, interactive gallery.
+          It's a space dedicated to showcasing what our community is passionate about,
           right on the museum floor.</p>
         <div className="home-img">
-          <img src="./ipadmockup.png" alt="" />
+          <img src="./installation.jpg" alt="" />
         </div>
         <p>Share a project you're working on, and it will appear on the screen for visitors to discover.</p>
         <div className="home-buttons">
-          <Link href="/profile" onClick={handleStartSubmission}>
-            <button className="start-button">Share a project</button>
+          <Link href="/profile" onClick={handleStartSubmission} className="start-button">
+            Share a project
           </Link>
-          <button className="friend-button">Invite a friend to participate</button>
+          <button
+            className="friend-button"
+            onClick={() => setShowSharePopup(true)}
+          >
+            Invite a friend to participate
+          </button>
         </div>
+        {showSharePopup && (
+          <div className="share-popup">
+            <div className="share-popup-header">
+              <h2>Invite a friend to participate</h2>
+              <button
+                className="close-button"
+                onClick={() => setShowSharePopup(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="share-icons">
+              <div className="icon-placeholder facebook" />
+              <div className="icon-placeholder whatsapp" />
+              <div className="icon-placeholder instagram" />
+              <div className="icon-placeholder imessage" />
+              <div className="icon-placeholder more" />
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }
