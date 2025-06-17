@@ -40,6 +40,8 @@ body {
   display: flex;
   flex-direction: column;
   background-color: black;
+  margin: 0;
+  overflow: hidden
 }
 
 main {
@@ -196,10 +198,11 @@ button {
 
 .eye-row {
   position: relative;
-  height: 200px;
+  height: 100%;
   overflow: hidden;
   width: 100%;
   margin: 0 auto;
+  padding-top: 65px;
 }
 
 .main {
@@ -219,8 +222,8 @@ button {
   font-size: 0.9rem;
   color: black;
   flex-direction: column;
-  transition: transform 0.5s, left 0.5s, opacity 0.5s, z-index 0s;
   cursor: pointer;
+  transition: left 0.5s ease, bottom 0.5s ease, transform 0.5s ease, opacity 0.5s ease;
 }
 
 .square img {
@@ -233,46 +236,66 @@ button {
 .square.hideLeft {
   left: 0%;
   opacity: 0;
-  transform: translateY(-50%) translateX(-50%) scale(0.5);
+  transform: translateY(-50%) translateX(-50%) scale(1);
   z-index: 1;
 }
 
-.square.hideRight {
-  left: 100%;
-  opacity: 0;
-  transform: translateY(-50%) translateX(-50%) scale(0.5);
-  z-index: 1;
+.square.prevLeftThird {
+  z-index: 2;
+  left: -1%;
+  transform: translateY(0) translateX(-50%) scale(1);
+  bottom: -10%;
+}
+
+.square.prevLeftSecond {
+  z-index: 4;
+  left: 14%;
+  transform: translateY(0) translateX(-50%) scale(1);
+  bottom: 20%;
 }
 
 .square.prev {
   z-index: 5;
   left: 30%;
-  transform: translateY(0) translateX(-50%) scale(0.8);
-}
-
-.square.prevLeftSecond {
-  z-index: 4;
-  left: 15%;
-  transform: translateY(0) translateX(-50%) scale(0.6);
+  transform: translateY(0) translateX(-50%) scale(1);
+  bottom: 45%;
 }
 
 .square.selected {
   z-index: 10;
   left: 50%;
-  transform: translateY(0) translateX(-50%) scale(1.2);
+  transform: translateY(0) translateX(-50%) scale(1.5);
 }
 
 .square.next {
   z-index: 5;
   left: 70%;
-  transform: translateY(0) translateX(-50%) scale(0.8);
+  transform: translateY(0) translateX(-50%) scale(1);
+  bottom: 45%;
 }
 
 .square.nextRightSecond {
   z-index: 4;
-  left: 85%;
-  transform: translateY(0) translateX(-50%) scale(0.6);
+  left: 86%;
+  transform: translateY(0) translateX(-50%) scale(1);
+  bottom: 20%;
 }
+
+.square.nextRightThird {
+  z-index: 2;
+  left: 101%;
+  transform: translateY(0) translateX(-50%) scale(1);
+  bottom: -10%;
+}
+
+.square.hideRight {
+  left: 100%;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-50%) scale(1);
+  z-index: 1;
+}
+
+/* CHANGE */
 
 .underline {
   text-decoration: underline;
@@ -407,4 +430,51 @@ button {
   width: 75% !important;
   height: 75% !important;
   object-fit: contain;
+}
+
+.vote-btn {
+  display: block;
+  padding: 15px 30px;
+  background-color: var(--orange);
+  color: #000000;
+  border: 1px solid black;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.vote-btn:active {
+  transform: scale(0.95);
+}
+
+#vote-view-page {
+  margin: 1rem;
+}
+
+.voting-content {
+  margin: 1rem;
+  background-color: var(--yellow);
+  border: 1px solid black;
+  padding: 2rem;
+  height: 100%;
+}
+
+.next-artwork-btn {
+  display: block;
+  padding: 15px 30px;
+  background-color: var(--blue);
+  color: #000000;
+  border: 1px solid black;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.controller-buttons {
+  display: flex;
+  gap: 1rem;
 }

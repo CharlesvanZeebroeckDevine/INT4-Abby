@@ -32,7 +32,9 @@ class ControllerApp {
 
         this.profiles = []
         this.categories = []
-        this.currentProfileIndex = 0
+        // Get the stored profile index or default to 0
+        this.currentProfileIndex = parseInt(sessionStorage.getItem('selectedProfileIndex')) || 0
+        this.currentArtworkIndex = 0
         this.isVoting = false
         this.currentView = 'carousel' // 'carousel' or 'seeall'
         this.selectedCategory = 'all'
@@ -170,6 +172,9 @@ class ControllerApp {
             socketConnected: this.socket.connected
         })
 
+        // Store the selected index in sessionStorage
+        sessionStorage.setItem('selectedProfileIndex', this.currentProfileIndex.toString())
+
         this.socket.emit('profile-selected', {
             profileIndex: this.currentProfileIndex,
             profile: selectedProfile
@@ -182,6 +187,21 @@ class ControllerApp {
         if (seeAllBtn) {
             seeAllBtn.addEventListener('click', () => {
                 window.location.href = './gridview.html' // Redirect to grid view page
+            })
+        }
+
+        // Vote button
+        const voteBtn = document.querySelector('.vote-btn')
+        if (voteBtn) {
+            voteBtn.addEventListener('click', () => {
+                // Store the selected profile data before redirecting
+                const selectedProfile = this.profiles[this.currentProfileIndex]
+                if (selectedProfile) {
+                    sessionStorage.setItem('selectedProfile', JSON.stringify(selectedProfile))
+                    window.location.href = './vote.html'
+                } else {
+                    console.error('No profile selected for voting')
+                }
             })
         }
 
@@ -228,6 +248,21 @@ class ControllerApp {
                 this.handleVoteSubmission()
             })
         }
+
+        // Next Artwork button
+        const nextArtworkBtn = document.querySelector('#next-artwork-btn')
+        if (nextArtworkBtn) {
+            nextArtworkBtn.addEventListener('click', () => {
+                const currentProfile = this.profiles[this.currentProfileIndex]
+                if (currentProfile?.artworks?.length > 1) {
+                    this.currentArtworkIndex = (this.currentArtworkIndex + 1) % currentProfile.artworks.length
+                    this.socket.emit('artwork-selected', {
+                        profileIndex: this.currentProfileIndex,
+                        artworkIndex: this.currentArtworkIndex
+                    })
+                }
+            })
+        }
     }
 
     handleSwipe(startX, endX) {
@@ -247,6 +282,9 @@ class ControllerApp {
         }
 
         console.log('Controller: New profile index after swipe:', this.currentProfileIndex)
+
+        // Store the selected index
+        sessionStorage.setItem('selectedProfileIndex', this.currentProfileIndex.toString())
 
         this.updateCarouselSelection()
         // Call emitProfileSelected directly instead of using debounced version for immediate feedback
@@ -269,13 +307,15 @@ class ControllerApp {
         console.log('Controller: Rendering avatars...', this.profiles.length)
         let avatarsHTML = ''
 
-        // Only create elements for the 5 visible avatars
+        // Create elements for 7 avatars
         const visibleIndices = [
+            (this.currentProfileIndex - 3 + this.profiles.length) % this.profiles.length, // prevLeftThird
             (this.currentProfileIndex - 2 + this.profiles.length) % this.profiles.length, // prevLeftSecond
             (this.currentProfileIndex - 1 + this.profiles.length) % this.profiles.length, // prev
             this.currentProfileIndex, // selected
             (this.currentProfileIndex + 1) % this.profiles.length, // next
-            (this.currentProfileIndex + 2) % this.profiles.length  // nextRightSecond
+            (this.currentProfileIndex + 2) % this.profiles.length, // nextRightSecond
+            (this.currentProfileIndex + 3) % this.profiles.length  // nextRightThird
         ]
 
         visibleIndices.forEach((index, position) => {
@@ -284,19 +324,25 @@ class ControllerApp {
 
             switch (position) {
                 case 0:
-                    className += ' prevLeftSecond'
+                    className += ' prevLeftThird'
                     break
                 case 1:
-                    className += ' prev'
+                    className += ' prevLeftSecond'
                     break
                 case 2:
-                    className += ' selected'
+                    className += ' prev'
                     break
                 case 3:
-                    className += ' next'
+                    className += ' selected'
                     break
                 case 4:
+                    className += ' next'
+                    break
+                case 5:
                     className += ' nextRightSecond'
+                    break
+                case 6:
+                    className += ' nextRightThird'
                     break
             }
 
@@ -326,6 +372,31 @@ class ControllerApp {
     updateCarouselSelection() {
         // Re-render the carousel with new positions
         this.renderAvatarsInRow()
+
+        const currentProfile = this.profiles[this.currentProfileIndex]
+        if (!currentProfile) return
+
+        // Update name display
+        const nameElement = document.querySelector('.name')
+        if (nameElement) {
+            nameElement.textContent = currentProfile.creator_name
+        }
+
+        // Update Next Artwork button visibility
+        const nextArtworkBtn = document.querySelector('#next-artwork-btn')
+        if (nextArtworkBtn) {
+            nextArtworkBtn.style.display = currentProfile.artworks?.length > 1 ? 'block' : 'none'
+        }
+
+        // Update avatar selection
+        const avatars = document.querySelectorAll('.avatar')
+        avatars.forEach((avatar, index) => {
+            if (index === this.currentProfileIndex) {
+                avatar.classList.add('selected')
+            } else {
+                avatar.classList.remove('selected')
+            }
+        })
     }
 
     async showSeeAllView() {
@@ -388,7 +459,7 @@ class ControllerApp {
             const avatarClass = hasAvatar ? '' : `no-avatar bg-${randomColor}`
 
             return `
-                <div class="profile-card" data-profile-id="${profile.id}">
+                <div class="profile-card" data-profile-id="${profile.id}" data-profile-index="${this.profiles.findIndex(p => p.id === profile.id)}">
                     <div class="profile-avatar ${avatarClass}">
                         <img src="${profile.avatar_url || '/images/abby/eye.svg'}"
                              alt="${profile.creator_name}"
@@ -398,6 +469,36 @@ class ControllerApp {
                 </div>
             `
         }).join('')
+
+        // Add click handlers to profile cards
+        const profileCards = grid.querySelectorAll('.profile-card')
+        profileCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const profileIndex = parseInt(card.dataset.profileIndex)
+                this.handleGridProfileSelection(profileIndex)
+            })
+        })
+    }
+
+    handleGridProfileSelection(profileIndex) {
+        if (profileIndex === undefined || profileIndex < 0 || profileIndex >= this.profiles.length) {
+            console.error('Invalid profile index:', profileIndex)
+            return
+        }
+
+        console.log('Controller: Grid profile selected:', profileIndex)
+
+        // Update the current profile index
+        this.currentProfileIndex = profileIndex
+
+        // Store the selected index before redirecting
+        sessionStorage.setItem('selectedProfileIndex', profileIndex.toString())
+
+        // Emit the profile selection to the monitor
+        this.emitProfileSelected()
+
+        // Redirect back to carousel view
+        window.location.href = './controller.html'
     }
 
     showVotingInterface() {
