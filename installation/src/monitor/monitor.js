@@ -4,7 +4,20 @@ import { fetchAllProfiles } from '../shared/services/supabase.js'
 class MonitorApp {
     constructor() {
         const url = new URL(window.location);
-        this.socket = io(`//${url.hostname}:3000`)
+        console.log('Monitor: Initializing with URL:', url.hostname);
+
+        // Construct the WebSocket URL
+        const wsUrl = `${window.location.protocol}//${url.hostname}:3000`;
+        console.log('Monitor: Connecting to WebSocket server at:', wsUrl);
+
+        this.socket = io(wsUrl, {
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            forceNew: true
+        });
+
         this.profiles = []
         this.currentProfileIndex = 0
         this.currentArtworkIndex = 0
@@ -38,13 +51,34 @@ class MonitorApp {
 
     setupSocketListeners() {
         this.socket.on('connect', () => {
-            console.log('Connected to server')
+            console.log('Monitor: Connected to server with ID:', this.socket.id)
+        })
+
+        this.socket.on('connect_error', (error) => {
+            console.error('Monitor: Connection error:', error)
+        })
+
+        this.socket.on('disconnect', (reason) => {
+            console.log('Monitor: Disconnected from server. Reason:', reason)
+        })
+
+        this.socket.on('error', (error) => {
+            console.error('Monitor: Socket error:', error)
         })
 
         // Listen for profile selection
         this.socket.on('profile-selected', (data) => {
+            console.log('Monitor: Received profile selection:', data)
             this.currentProfileIndex = data.profileIndex
             this.currentArtworkIndex = 0 // Reset artwork index when profile changes
+            this.renderCurrentProfile()
+        })
+
+        // Listen for state updates
+        this.socket.on('state-update', (state) => {
+            console.log('Monitor: Received state update:', state)
+            this.currentProfileIndex = state.selectedProfileIndex
+            this.currentArtworkIndex = state.selectedArtworkIndex
             this.renderCurrentProfile()
         })
 
@@ -140,7 +174,7 @@ class MonitorApp {
             // Update process description
             const processInfo = document.querySelector('.info-process p')
             if (processInfo) {
-                processInfo.textContent = this.currentArtwork.process_description || ''
+                processInfo.textContent = this.currentArtwork.process_description
             }
 
             // Update process images if available
@@ -167,22 +201,21 @@ class MonitorApp {
                         // Sort images by aspect ratio (vertical vs horizontal)
                         const sortedImages = images.sort((a, b) => b.ratio - a.ratio)
 
-                        // Vertical image (lower ratio) goes in main
-                        if (processPicMain && sortedImages[1]?.url) {
-                            processPicMain.innerHTML = `
-                                <img class="process-pic" src="${sortedImages[1].url}" alt="Process image" />
-                            `
-                        } else if (processPicMain) {
-                            processPicMain.innerHTML = ''
-                        }
+                        // Only update if we have at least one image
+                        if (sortedImages.length > 0) {
+                            // Vertical image (lower ratio) goes in main
+                            if (processPicMain && sortedImages[0]) {
+                                processPicMain.innerHTML = `
+                                    <img class="process-pic" src="${sortedImages[0].url}" alt="Process image" />
+                                `
+                            }
 
-                        // Horizontal image (higher ratio) goes in secondary
-                        if (processPicSecondary && sortedImages[0]?.url) {
-                            processPicSecondary.innerHTML = `
-                                <img class="process-pic" src="${sortedImages[0].url}" alt="Process image" />
-                            `
-                        } else if (processPicSecondary) {
-                            processPicSecondary.innerHTML = ''
+                            // Horizontal image (higher ratio) goes in secondary
+                            if (processPicSecondary && sortedImages.length > 1 && sortedImages[1]) {
+                                processPicSecondary.innerHTML = `
+                                    <img class="process-pic" src="${sortedImages[1].url}" alt="Process image" />
+                                `
+                            }
                         }
                     })
                     .catch(error => {
