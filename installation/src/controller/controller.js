@@ -2,7 +2,6 @@ console.log('Controller.js script started parsing.');
 
 import { io } from 'socket.io-client'
 import { fetchAllProfiles, fetchProfilesByCategory, fetchCategories, submitVote } from '../shared/services/supabase.js'
-import ArduinoController from '../shared/arduino-controller.js'
 
 // Debounce utility function
 const debounce = (func, delay) => {
@@ -20,9 +19,7 @@ class ControllerApp {
         console.log('Controller: Initializing with URL:', url.hostname);
 
         // Construct the WebSocket URL
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${window.location.protocol}//${url.hostname}:3000`;
-
         console.log('Controller: Connecting to WebSocket server at:', wsUrl);
 
         this.socket = io(wsUrl, {
@@ -39,20 +36,13 @@ class ControllerApp {
         this.isVoting = false
         this.currentView = 'carousel' // 'carousel' or 'seeall'
         this.selectedCategory = 'all'
-        this.arduinoController = null
 
         // Debounced function for emitting profile selections
         this.debouncedEmitProfileSelected = debounce(this.emitProfileSelected, 150) // 150ms debounce
-
-        // The init() method will now be called by the DOMContentLoaded listener outside the class
-        // This ensures the DOM is fully loaded before initialization.
     }
 
     async init() {
         try {
-            // Initialize Arduino controller
-            this.arduinoController = new ArduinoController(this.socket)
-
             // Load data from database
             console.log('Controller: Calling loadProfiles...')
             await this.loadProfiles()
@@ -134,28 +124,6 @@ class ControllerApp {
 
         this.socket.on('error', (error) => {
             console.error('Controller: Socket error:', error)
-        })
-
-        // Listen for knob updates from the server
-        this.socket.on('knob-turn', (direction) => {
-            if (this.profiles.length === 0) return
-
-            if (direction === 'RIGHT') {
-                this.currentProfileIndex = (this.currentProfileIndex + 1) % this.profiles.length
-            } else if (direction === 'LEFT') {
-                this.currentProfileIndex = (this.currentProfileIndex - 1 + this.profiles.length) % this.profiles.length
-            }
-            this.updateCarouselSelection()
-            this.emitProfileSelected()
-        })
-
-        // Listen for arrow button (Enter key) to change artwork
-        this.socket.on('simulate-arrow', () => {
-            const currentProfile = this.profiles[this.currentProfileIndex]
-            if (!currentProfile || !currentProfile.artworks || currentProfile.artworks.length <= 1) return
-
-            // Get current artwork index from monitor's state
-            this.socket.emit('get-current-artwork', { profileIndex: this.currentProfileIndex })
         })
 
         // Listen for current artwork index from monitor
